@@ -6,7 +6,7 @@ import base64
 # Tab sarlavhasi va ikonkasini o'rnatish
 st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
 
-# --- IXCHAM VA MARKAZLASHTIRILGAN DIZAYN (CSS) ---
+# --- TO'LIQ VA YANGILANGAN DIZAYN (CSS) ---
 st.markdown("""
     <style>
     /* Streamlit asosiy menyulari va headerlarni yashirish */
@@ -45,16 +45,16 @@ st.markdown("""
         box-sizing: border-box;
     }
 
-    /* [+] popover tugmasini kichikroq va ixcham qilish */
+    /* [+] popover tugmasini aniq ko'rinadigan va chiroyli qilish */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
-        width: 36px !important;
-        height: 36px !important;
+        width: 38px !important;
+        height: 38px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
         border: 1px solid #3d3d3d !important;
-        font-size: 20px !important;
+        font-size: 22px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -158,3 +158,4 @@ else:
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
 
         st.rerun()
+        
