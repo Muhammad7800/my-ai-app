@@ -9,15 +9,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- CSS DIZAYN ---
+# --- TOZALANGAN CSS ---
 st.markdown("""
     <style>
-    #MainMenu, header, footer, .stDeployButton, [data-testid="stToolbar"] {
+    #MainMenu, footer, .stDeployButton {
         display: none !important;
-    }
-    header {
-        visibility: visible !important;
-        background: transparent !important;
     }
     .block-container {
         padding-bottom: 110px !important;
@@ -122,7 +118,6 @@ else:
 
     current_messages = st.session_state.chats[st.session_state.current_chat_id]
 
-    # Xabarlar yoki xush kelibsiz ekranini chiqarish
     if not current_messages:
         st.markdown("""
             <div class="welcome-container">
@@ -135,16 +130,13 @@ else:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    # Chat input (Xabar yuborish)
     prompt = st.chat_input("Ask a question...")
 
     if prompt:
-        # Foydalanuvchi xabarini qo'shish va ekranga chiqarish
         current_messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Bot javobini olish
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
@@ -160,3 +152,5 @@ else:
 
                 st.markdown(bot_reply)
                 current_messages.append({"role": "assistant", "content": bot_reply})
+        
+        st.rerun()
