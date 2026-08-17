@@ -17,11 +17,11 @@ st.markdown("""
 
     /* Asosiy kontent pastga yopishmasligi uchun */
     .block-container {
-        padding-bottom: 140px !important;
+        padding-bottom: 170px !important;
         max-width: 750px !important;
     }
 
-    /* Chat input va konteynerni pastda birga fiks qilish */
+    /* Pastki panel (Chat input va [+] tugmasi) */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
         position: fixed !important;
         bottom: 15px !important;
@@ -114,13 +114,6 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Agar [+] bosilgan bo'lsa, fayl yuklash oynasi chat input ustida ochiladi
-    uploaded_file = None
-    if st.session_state.show_uploader:
-        st.markdown('<div style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 750px; background: #1e1e1e; padding: 12px; border-radius: 12px; border: 1px solid #444; z-index: 1000;">', unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
-        st.markdown('</div>', unsafe_allow_html=True)
-
     # Pastki panel: [+] tugmasi va Chat Input yonma-yon
     col1, col2 = st.columns([1, 15])
 
@@ -131,6 +124,13 @@ else:
 
     with col2:
         prompt = st.chat_input("Savolingizni yozing...")
+
+    # Agar [+] bosilgan bo'lsa, fayl yuklash oynasi aynan chat inputning TEPASIDA chiqadi
+    uploaded_file = None
+    if st.session_state.show_uploader:
+        st.markdown('<div style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 750px; background: #161922; padding: 12px; border-radius: 14px; border: 1px solid #444; z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.4);">', unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
+        st.markdown('</div>', unsafe_allow_html=True)
 
     if prompt:
         img = None
