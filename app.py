@@ -17,52 +17,43 @@ st.markdown("""
 
     /* Asosiy kontent pastga yopishmasligi uchun */
     .block-container {
-        padding-bottom: 160px !important;
+        padding-bottom: 140px !important;
         max-width: 750px !important;
     }
 
-    /* Pastki panelni qat'iy fiks qilish */
-    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
-        position: fixed;
-        bottom: 15px; 
-        left: 50%;
-        transform: translateX(-50%);
-        width: 95%;
-        max-width: 750px;
-        background-color: #0e1117;
-        padding: 12px 14px;
-        border-radius: 20px;
-        border: 1px solid #333333;
+    /* Chat inputni pastda fiks qilish va chiroyli dizayn berish */
+    div[data-testid="stChatInput"] {
+        position: fixed !important;
+        bottom: 15px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 95% !important;
+        max-width: 750px !important;
         z-index: 999;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        box-sizing: border-box;
     }
 
-    /* Ustunlarni bir qatorga tekislash */
-    div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        margin-top: 5px;
+    /* [+] tugmasi joylashuvi va uslubi */
+    .upload-btn-container {
+        position: fixed !important;
+        bottom: 22px !important;
+        left: calc(50% - 375px + 15px) !important;
+        z-index: 1000;
     }
 
-    div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        flex: 0 0 45px !important;
-        width: 45px !important;
-    }
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
-        flex: 1 1 auto !important;
+    @media (max-width: 768px) {
+        .upload-btn-container {
+            left: 20px !important;
+        }
     }
 
-    /* [+] tugmasi uslubi */
     div.stButton > button {
         border-radius: 50% !important;
-        width: 45px !important;
-        height: 45px !important;
+        width: 42px !important;
+        height: 42px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
-        border: 1px solid #3d3d3d !important;
+        border: 1px solid #444444 !important;
         font-size: 20px !important;
         display: flex !important;
         align-items: center !important;
@@ -72,24 +63,8 @@ st.markdown("""
 
     div.stButton > button:hover {
         background-color: #333333 !important;
-        border-color: #555555 !important;
+        border-color: #666666 !important;
         color: #ffffff !important;
-    }
-
-    /* Chat inputni chiroyli qilish */
-    div[data-testid="stChatInput"] {
-        position: relative !important;
-        bottom: auto !important;
-        left: auto !important;
-        transform: none !important;
-        width: 100% !important;
-        background: transparent !important;
-        padding: 0 !important;
-    }
-
-    div[data-testid="stChatInput"] > div {
-        background: transparent !important;
-        border: none !important;
     }
     
     textarea { spellcheck: false !important; }
@@ -106,7 +81,6 @@ else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
     
-    # Fayl yuklash oynasi ochiq/yopiqligini saqlash uchun
     if "show_uploader" not in st.session_state:
         st.session_state.show_uploader = False
 
@@ -117,21 +91,22 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Agar [+] bosilgan bo'lsa, fayl yuklash maydonini ko'rsatish
+    # Fayl yuklash oynasi ochiq bo'lsa chat input tepasida chiqadi
     uploaded_file = None
     if st.session_state.show_uploader:
+        st.markdown('<div style="position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 750px; background: #1e1e1e; padding: 10px; border-radius: 12px; border: 1px solid #444; z-index: 1000;">', unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Rasm yuklang", type=["jpg", "jpeg", "png"])
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # Pastki qism: [+] tugmasi va Chat Input yonma-yon
-    col1, col2 = st.columns([1, 15])
+    # Chap tarafdagi [+] tugmasi
+    st.markdown('<div class="upload-btn-container">', unsafe_allow_html=True)
+    if st.button("＋"):
+        st.session_state.show_uploader = not st.session_state.show_uploader
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with col1:
-        if st.button("＋"):
-            st.session_state.show_uploader = not st.session_state.show_uploader
-            st.rerun()
-
-    with col2:
-        prompt = st.chat_input("Savolingizni yozing...")
+    # Asosiy chat input
+    prompt = st.chat_input("Savolingizni yozing...")
 
     if prompt:
         img = None
@@ -146,8 +121,6 @@ else:
             if img: st.image(img, width=250)
 
         st.session_state.messages.append({"role": "user", "content": prompt, "image_base64": image_base64})
-
-        # Fayl yuborilgandan keyin uploader'ni yopib qo'yish
         st.session_state.show_uploader = False
 
         with st.chat_message("assistant"):
