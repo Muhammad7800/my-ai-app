@@ -10,15 +10,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- QURILMANI ANIqlash (Har bir qurilma uchun alohida ID) ---
-if "device" not in st.query_params:
-    st.query_params["device"] = str(uuid.uuid4())
-current_device_id = st.query_params["device"]
-
-# --- BAZANI YARATISH VA ULANISH ---
+# --- BAZANI YARATISH VA TEKKSHIRISH ---
 def init_db():
     conn = sqlite3.connect('chat_history.db', check_same_thread=False)
     cursor = conn.cursor()
+    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             device_id TEXT,
@@ -27,10 +23,30 @@ def init_db():
             content TEXT
         )
     ''')
+    
+    # Eski jadvalda device_id ustuni yo'q bo'lsa, xatolik chiqmasligi uchun tekshiramiz va yangilaymiz
+    try:
+        cursor.execute("SELECT device_id FROM messages LIMIT 1")
+    except sqlite3.OperationalError:
+        cursor.execute("DROP TABLE messages")
+        cursor.execute('''
+            CREATE TABLE messages (
+                device_id TEXT,
+                chat_id TEXT,
+                role TEXT,
+                content TEXT
+            )
+        ''')
+        
     conn.commit()
     return conn
 
 db_conn = init_db()
+
+# --- QURILMANI ANIQLASH ---
+if "device" not in st.query_params:
+    st.query_params["device"] = str(uuid.uuid4())
+current_device_id = st.query_params["device"]
 
 def get_all_chats(conn, device_id):
     cursor = conn.cursor()
@@ -116,7 +132,6 @@ if not api_key:
 else:
     client = genai.Client(api_key=api_key)
 
-    # Shu qurilmaga tegishli chatlarni olish
     chats = get_all_chats(db_conn, current_device_id)
 
     if "current_chat_id" not in st.session_state:
