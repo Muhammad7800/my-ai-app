@@ -6,7 +6,7 @@ import base64
 # Tab sarlavhasi va ikonkasini o'rnatish
 st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
 
-# --- IXCHAM VA TOZA DIZAYN (CSS) ---
+# --- IXCHAM VA MARKAZLASHTIRILGAN DIZAYN (CSS) ---
 st.markdown("""
     <style>
     /* Streamlit asosiy menyulari va headerlarni yashirish */
@@ -14,7 +14,7 @@ st.markdown("""
         display: none !important;
     }
 
-    /* "Manage app" tugmasini kichraytirib, burchakka yashirish (ixcham holatda) */
+    /* "Manage app" tugmasini kichraytirib, burchakka yashirish */
     div[class*="viewerBadge"], [data-testid="manage-app-button"] {
         transform: scale(0.65) !important;
         transform-origin: bottom right !important;
@@ -31,14 +31,16 @@ st.markdown("""
         max-width: 750px !important;
     }
 
-    /* Pastdagi yozish qismini ixcham qilish */
+    /* Pastdagi yozish qismini cho'zib yubormasdan, ixcham va markazda saqlash */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
         position: fixed;
         bottom: 0;
-        left: 0;
+        left: 50%;
+        transform: translateX(-50%);
         width: 100%;
+        max-width: 750px;
         background-color: #0e1117;
-        padding: 8px 16px;
+        padding: 10px 16px;
         z-index: 100;
         box-sizing: border-box;
     }
@@ -77,7 +79,7 @@ st.markdown("""
         margin: 0 auto;
     }
 
-    /* Chat input katagini ixcham va chiroyli qilish */
+    /* Chat input katagini ixcham qilish */
     div[data-testid="stChatInput"] {
         border-radius: 20px !important;
         min-height: 38px !important;
@@ -112,11 +114,11 @@ else:
 
     with col1:
         with st.popover("+"):
-            st.markdown("📎 **Fayl biriktirish**")
-            uploaded_file = st.file_uploader("Rasm yuklang", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+            st.markdown("📎 **Attach file**")
+            uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
     with col2:
-        prompt = st.chat_input("Xabar yozing...")
+        prompt = st.chat_input("Type a message...")
 
     if prompt:
         img = Image.open(uploaded_file) if uploaded_file else None
