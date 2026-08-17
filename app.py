@@ -172,7 +172,7 @@ else:
         
         st.divider()
 
-        # Chatlar tarixi ro'yxati va har birini o'chirish imkoniyati
+        # Chatlar tarixi ro'yxati va o'chirish imkoniyati
         chat_ids = list(st.session_state.chats.keys())
         for i, cid in enumerate(chat_ids):
             chat_history = st.session_state.chats[cid]
@@ -181,7 +181,6 @@ else:
             else:
                 chat_title = f"Chat {i+1} ({t['empty']})"
             
-            # Har bir chat qatorini ustunlarga bo'lish (Chatni ochish va o'chirish tugmasi uchun)
             col1, col2 = st.columns([0.8, 0.2])
             
             with col1:
@@ -191,23 +190,18 @@ else:
             
             with col2:
                 if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
-                    # Chatni o'chirish
                     del st.session_state.chats[cid]
-                    # Agar hamma chatlar o'chib ketsa, yangi bo'sh chat ochish
                     if not st.session_state.chats:
                         new_id = str(uuid.uuid4())
                         st.session_state.chats[new_id] = []
                         st.session_state.current_chat_id = new_id
                     elif st.session_state.current_chat_id == cid:
-                        # Agar o'chirilgan chat hozir ochilgan bo'lsa, boshqa mavjud chatga o'tish
                         st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
                     st.rerun()
 
-    # Agar joriy chat ID xatolik tufayli mavjud bo'lmasa, uni to'g'rilash
     if st.session_state.current_chat_id not in st.session_state.chats:
         st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
 
-    # Joriy chat xabarlari
     current_messages = st.session_state.chats[st.session_state.current_chat_id]
 
     # Chat tarixini chiqarish
@@ -226,9 +220,10 @@ else:
         with st.chat_message("assistant"):
             with st.spinner(t["thinking"]):
                 try:
+                    full_prompt = f"User input: {prompt}. Answer strictly in the same language as the user's input."
                     response = client.models.generate_content(
                         model="gemini-2.5-flash", 
-                        contents=prompt
+                        contents=full_prompt
                     )
                     bot_reply = response.text
                 except Exception as e:
