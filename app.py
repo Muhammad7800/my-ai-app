@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- ADAPTIV CSS (Telefon va Notebook uchun bir xil) ---
+# --- CSS ---
 st.markdown("""
     <style>
     #MainMenu, footer, .stDeployButton {
@@ -62,16 +62,6 @@ st.markdown("""
         font-size: 1.1rem;
         color: #888888;
     }
-    
-    /* Mobil qurilmalar uchun kichik moslashuv */
-    @media (max-width: 640px) {
-        .welcome-title {
-            font-size: 1.8rem;
-        }
-        .welcome-subtitle {
-            font-size: 1rem;
-        }
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -81,13 +71,14 @@ if not api_key:
 else:
     client = genai.Client(api_key=api_key)
 
+    # Sessiyada chatlar saqlanishini ta'minlash
     if "chats" not in st.session_state:
-        st.session_state.chats = {}
-    
-    if "current_chat_id" not in st.session_state:
         initial_id = str(uuid.uuid4())
+        st.session_state.chats = {initial_id: []}
         st.session_state.current_chat_id = initial_id
-        st.session_state.chats[initial_id] = []
+    
+    if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.chats:
+        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
 
     # --- CHAP PANEL ---
     with st.sidebar:
@@ -119,16 +110,13 @@ else:
                     del st.session_state.chats[cid]
                     if not st.session_state.chats:
                         new_id = str(uuid.uuid4())
-                        st.session_state.chats[new_id] = []
+                        st.session_state.chats = {new_id: []}
                         st.session_state.current_chat_id = new_id
-                    elif st.session_state.current_chat_id == cid:
+                    else:
                         st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
                     st.rerun()
 
     # --- ASOSIY CHAT OYNASI ---
-    if st.session_state.current_chat_id not in st.session_state.chats:
-        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
-
     current_messages = st.session_state.chats[st.session_state.current_chat_id]
 
     if not current_messages:
