@@ -29,14 +29,27 @@ st.markdown("""
         width: 95%;
         max-width: 750px;
         background-color: #0e1117;
-        padding: 5px 10px;
+        padding: 10px 16px;
         z-index: 999;
+        box-sizing: border-box;
+        border-radius: 16px;
     }
 
-    /* Ustunlarni bir qatorga va yondosh qilish */
+    /* Ustunlarni bir qatorga va tekis joylashtirish */
     div[data-testid="stHorizontalBlock"] {
         align-items: center !important;
-        gap: 8px !important;
+        gap: 10px !important;
+    }
+
+    /* 1-ustun ([+] tugmasi uchun) o'lchami */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+        flex: 0 0 45px !important;
+        max-width: 45px !important;
+    }
+
+    /* 2-ustun (Chat input uchun) qolgan joyni egallaydi */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+        flex: 1 1 auto !important;
     }
 
     /* [+] tugmasi uslubi (Aylanali) */
@@ -52,7 +65,6 @@ st.markdown("""
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        margin-top: 5px !important;
     }
 
     div[data-testid="stPopover"] > button:hover {
@@ -95,7 +107,7 @@ else:
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
     # Pastki qism: Chapda [+] va o'ngda Input
-    col1, col2 = st.columns([0.1, 1])
+    col1, col2 = st.columns([1, 15])
 
     with col1:
         with st.popover("+"):
