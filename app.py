@@ -157,7 +157,9 @@ else:
         with st.chat_message("assistant"):
             with st.spinner(t["thinking"]):
                 try:
-                    full_prompt = f"User input: {prompt}. Answer strictly in the same language as the user's input."
+                    # Modelga qat'iy qilib aynan foydalanuvchi yozgan tilda javob berishini uqtiramiz
+                    full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language (e.g. if it's Uzbek, reply in Uzbek; if Russian, reply in Russian; if English, reply in English). Do not switch to random languages.\n\nText: {prompt}"
+                    
                     response = client.models.generate_content(
                         model="gemini-2.5-flash", 
                         contents=full_prompt
