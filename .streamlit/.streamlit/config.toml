@@ -1,8 +1,0 @@
-[client]
-showSidebarNavigation = false
-
-[menu]
-showGitLink = false
-showDeploymentStatus = false
-showRunningStatus = false
-showAbout = false
