@@ -5,7 +5,24 @@ from PIL import Image
 # Sahifa sozlamalari
 st.set_page_config(page_title="Gemini Core", page_icon="⚡", layout="centered")
 
-# Yon menyu (Sidebar) - Custom sozlamalar
+# --- STREAMLIT DIZAYNINI YASHIRISH (CUSTOM CSS) ---
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            header {visibility: hidden;}
+            footer {visibility: hidden;}
+            .stAppHeader {display: none;}
+            .stDeployButton {display:none;}
+            div[data-testid="stToolbar"] {visibility: hidden; height: 0%; position: fixed;}
+            div[data-testid="stDecoration"] {visibility: hidden; width: 0px; height: 0px;}
+            div[data-testid="stStatusWidget"] {visibility: hidden;}
+            #stDecoration {display:none;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# --------------------------------------------------
+
+# Yon menyu (Sidebar)
 with st.sidebar:
     st.title("⚡ Gemini Core")
     st.caption("Shaxsiy Sun'iy Intellekt Yordamchisi")
@@ -33,7 +50,7 @@ else:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Rasm yuklash maydoni (ixtiyoriy)
+    # Rasm yuklash maydoni
     uploaded_file = st.file_uploader("Rasm biriktirish (ixtiyoriy)", type=["jpg", "jpeg", "png"])
     img = Image.open(uploaded_file) if uploaded_file else None
 
@@ -42,11 +59,9 @@ else:
 
     # Matn kiritish maydoni
     if prompt := st.chat_input("Savolingizni yozing..."):
-        # Foydalanuvchi xabarini ko'rsatish
         st.chat_message("user").markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # AI javobi
         with st.chat_message("assistant"):
             with st.spinner("O'ylanmoqda..."):
                 system_instruction = (
@@ -54,7 +69,6 @@ else:
                     "Foydalanuvchiga aniq, tushunarli va ravon dilda javob bering."
                 )
 
-                # So'rovni tayyorlash
                 if img:
                     contents = [prompt, img]
                 else:
@@ -69,5 +83,4 @@ else:
 
                 st.markdown(response.text)
 
-        # AI javobini xotiraga saqlash
         st.session_state.messages.append({"role": "assistant", "content": response.text})
