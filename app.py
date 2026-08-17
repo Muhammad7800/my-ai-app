@@ -129,15 +129,4 @@ else:
                     contents=contents,
                     config={"system_instruction": system_instruction}
                 )
-                [client]
-showSidebarNavigation = false
-
-[menu]
-showGitLink = false
-showDeploymentStatus = false
-showRunningStatus = false
-showAbout = false
-                st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-
-        st.rerun()
+          
