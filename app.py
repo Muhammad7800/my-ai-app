@@ -3,9 +3,9 @@ from google import genai
 from PIL import Image
 import base64
 
-st.set_page_config(page_title="Gemini AI", page_icon="⚡", layout="centered")
+st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
 
-# --- UI DIZAYNINI O'ZGARTIRISH (CSS) ---
+# --- UI DIZAYNINI PASTGA TUSHIRISH UCHUN YANGILANGAN CSS ---
 st.markdown("""
     <style>
     /* Streamlit menyulari va sarlavhalarini yashirish */
@@ -13,7 +13,24 @@ st.markdown("""
         display: none !important;
     }
 
-    /* Popover (+) tugmasini aylanali qilib bezash */
+    /* Asosiy kontent blokini pastga joylashishga moslash */
+    .block-container {
+        padding-bottom: 100px !important;
+    }
+
+    /* Input va tugma joylashgan pastki qismni sahifaning eng pastiga qadash */
+    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #0e1117; /* Fon rangi bilan bir xil */
+        padding: 10px 20px;
+        z-index: 100;
+        box-sizing: border-box;
+    }
+
+    /* Popover (+) tugmasini aylana shaklida chiroyli qilish */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
         width: 42px !important;
@@ -34,7 +51,6 @@ st.markdown("""
         border-color: #555555 !important;
     }
 
-    /* Popover ichidagi menyuni qorong'i uslubga o'tkazish */
     div[data-testid="stPopoverBody"] {
         background-color: #212121 !important;
         border: 1px solid #333333 !important;
@@ -42,12 +58,12 @@ st.markdown("""
         padding: 12px !important;
     }
 
-    /* Pastki elementlarni bitta qatorga tekislash */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    /* Chat input-ni chiroyli qilish */
     div[data-testid="stChatInput"] {
         border-radius: 24px !important;
     }
@@ -64,18 +80,16 @@ else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Chat tarixini ko'rsatish
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Pastki kiritish qatori: [+] Popover tugmasi va Chat Input
+    # Pastki qism: [+] popover va chat input
     col1, col2 = st.columns([1, 12])
 
     with col1:
-        # [+] tugmasi bosilganda ochiladigan popup menyu
         with st.popover("+"):
             st.markdown("📎 **Fayl biriktirish**")
             uploaded_file = st.file_uploader("Rasm yuklang", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
@@ -91,7 +105,6 @@ else:
             uploaded_file.seek(0)
             image_base64 = base64.b64encode(uploaded_file.read()).decode()
 
-        # Foydalanuvchi xabari
         with st.chat_message("user"):
             st.markdown(prompt)
             if img:
@@ -102,7 +115,6 @@ else:
             user_msg["image_base64"] = image_base64
         st.session_state.messages.append(user_msg)
 
-        # AI Javobi
         with st.chat_message("assistant"):
             with st.spinner("..."):
                 system_instruction = "Siz aqlli va do'stona AI yordamchisiz. Qisqa va aniq javob bering."
