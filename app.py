@@ -16,60 +16,64 @@ st.markdown("""
 
     /* Asosiy kontent pastga yopishmasligi uchun */
     .block-container {
-        padding-bottom: 120px !important;
+        padding-bottom: 130px !important;
         max-width: 750px !important;
     }
 
-    /* Input va [+] tugmasi turgan umumiy joylashuv (Pastdan 15px tepada) */
-    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
+    /* Pastki panelni qat'iy fiks qilish */
+    .fixed-footer {
         position: fixed;
-        bottom: 15px; 
+        bottom: 15px;
         left: 50%;
         transform: translateX(-50%);
         width: 95%;
         max-width: 750px;
-        background-color: transparent;
+        background-color: #0e1117;
+        padding: 10px 14px;
+        border-radius: 20px;
+        border: 1px solid #333333;
         z-index: 999;
-        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
     }
 
-    /* Ustunlarni mukammal vertikal markazga keltirish */
-    div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
+    /* Streamlitning standart input qismini moslashtirish */
+    div[data-testid="stChatInput"] {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
     }
 
-    /* Birinchi ustun kengligi */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        flex: 0 0 50px !important;
-        width: 50px !important;
-    }
-    
-    /* Ikkinchi ustun (Chat input) qolgan joyni egallaydi */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
-        flex: 1 1 auto !important;
+    div[data-testid="stChatInput"] > div {
+        background: transparent !important;
+        border: none !important;
     }
 
-    /* [+] tugmasi uslubi (To'liq ko'rinadigan va chiroyli) */
+    /* [+] tugmasi uslubi */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
-        width: 45px !important;
-        height: 45px !important;
+        width: 42px !important;
+        height: 42px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
-        border: 1px solid #3d3d3d !important;
-        font-size: 24px !important;
+        border: 1px solid #444444 !important;
+        font-size: 22px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     div[data-testid="stPopover"] > button:hover {
         background-color: #333333 !important;
-        border-color: #555555 !important;
+        border-color: #666666 !important;
     }
 
     div[data-testid="stPopoverBody"] {
@@ -77,11 +81,6 @@ st.markdown("""
         border: 1px solid #333333 !important;
         border-radius: 16px !important;
         padding: 12px !important;
-    }
-
-    /* Chat inputni chiroyli qilish */
-    div[data-testid="stChatInput"] {
-        border-radius: 24px !important;
     }
     
     textarea { spellcheck: false !important; }
@@ -105,8 +104,8 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Pastki qism: [+] tugmasi va Chat Input yonma-yon
-    col1, col2 = st.columns([1, 14])
+    # UI elementlarini konteyner ichida yonma-yon joylashtiramiz
+    col1, col2 = st.columns([1, 14], gap="small")
 
     with col1:
         with st.popover("+"):
