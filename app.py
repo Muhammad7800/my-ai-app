@@ -3,13 +3,14 @@ from google import genai
 from PIL import Image
 import base64
 
+# Tab sarlavhasi va ikonkasini o'rnatish
 st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
 
-# --- UI DIZAYNINI PASTGA TUSHIRISH UCHUN YANGILANGAN CSS ---
+# --- TO'LIQ UI DIZAYNI (CSS) ---
 st.markdown("""
     <style>
-    /* Streamlit menyulari va sarlavhalarini yashirish */
-    #MainMenu, header, footer, .stAppHeader, .stDeployButton, [data-testid="stToolbar"] {
+    /* Barcha Streamlit menyulari, "Manage app", header, footer va logolarni butunlay yashirish */
+    #MainMenu, header, footer, .stAppHeader, .stDeployButton, [data-testid="stToolbar"], [data-testid="manage-app-button"], div[class*="viewerBadge"], footer {
         display: none !important;
     }
 
@@ -18,19 +19,19 @@ st.markdown("""
         padding-bottom: 100px !important;
     }
 
-    /* Input va tugma joylashgan pastki qismni sahifaning eng pastiga qadash */
+    /* Chat input va tugma joylashgan pastki qismni sahifaning eng pastiga qadash */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        background-color: #0e1117; /* Fon rangi bilan bir xil */
+        background-color: #0e1117;
         padding: 10px 20px;
         z-index: 100;
         box-sizing: border-box;
     }
 
-    /* Popover (+) tugmasini aylana shaklida chiroyli qilish */
+    /* [+] popover tugmasi */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
         width: 42px !important;
@@ -70,6 +71,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# API Kalitini olish
 api_key = st.secrets.get("GEMINI_API_KEY")
 
 if not api_key:
@@ -80,6 +82,7 @@ else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    # Chat tarixini ko'rsatish
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -115,6 +118,7 @@ else:
             user_msg["image_base64"] = image_base64
         st.session_state.messages.append(user_msg)
 
+        # AI Javobi
         with st.chat_message("assistant"):
             with st.spinner("..."):
                 system_instruction = "Siz aqlli va do'stona AI yordamchisiz. Qisqa va aniq javob bering."
@@ -129,4 +133,8 @@ else:
                     contents=contents,
                     config={"system_instruction": system_instruction}
                 )
-          
+                
+                st.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+
+        st.rerun()
