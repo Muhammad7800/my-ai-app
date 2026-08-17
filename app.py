@@ -9,23 +9,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- TOZALANGAN CSS ---
+# --- ADAPTIV CSS (Telefon va Notebook uchun bir xil) ---
 st.markdown("""
     <style>
     #MainMenu, footer, .stDeployButton {
         display: none !important;
     }
     .block-container {
-        padding-bottom: 110px !important;
+        padding-bottom: 120px !important;
         max-width: 800px !important;
-        padding-top: 30px !important;
+        padding-top: 20px !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
     }
     div[data-testid="stChatInput"] {
         position: fixed !important;
         bottom: 15px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
-        width: 95% !important;
+        width: 92% !important;
         max-width: 750px !important;
         background-color: #1a1c23 !important;
         border-radius: 16px !important;
@@ -44,11 +46,12 @@ st.markdown("""
     }
     .welcome-container {
         text-align: center;
-        margin-top: 15vh;
-        margin-bottom: 30px;
+        margin-top: 12vh;
+        margin-bottom: 20px;
+        padding: 0 10px;
     }
     .welcome-title {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 700;
         margin-bottom: 10px;
         background: linear-gradient(90deg, #4b6cb7, #182848);
@@ -56,8 +59,18 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
     }
     .welcome-subtitle {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         color: #888888;
+    }
+    
+    /* Mobil qurilmalar uchun kichik moslashuv */
+    @media (max-width: 640px) {
+        .welcome-title {
+            font-size: 1.8rem;
+        }
+        .welcome-subtitle {
+            font-size: 1rem;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
