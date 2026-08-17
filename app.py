@@ -20,7 +20,7 @@ st.markdown("""
         max-width: 750px !important;
     }
 
-    /* Input va [+] tugmasi qismi (Pastdan 15px tepada) */
+    /* Input va [+] tugmasi turgan umumiy joylashuv (Pastdan 15px tepada) */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
         position: fixed;
         bottom: 15px; 
@@ -28,40 +28,42 @@ st.markdown("""
         transform: translateX(-50%);
         width: 95%;
         max-width: 750px;
-        background-color: #0e1117;
-        padding: 10px 16px;
+        background-color: transparent;
         z-index: 999;
         box-sizing: border-box;
-        border-radius: 16px;
     }
 
-    /* Ustunlarni bir qatorga va tekis joylashtirish */
+    /* Ustunlarni bitta qatorga va chiroyli ramkaga olish */
     div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 8px !important;
+        background-color: #0e1117;
+        padding: 8px 12px;
+        border-radius: 28px;
+        border: 1px solid #333333;
     }
 
-    /* 1-ustun ([+] tugmasi uchun) o'lchami */
+    /* Ustun kengliklarini to'g'rilash */
     div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        flex: 0 0 45px !important;
-        max-width: 45px !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
     }
-
-    /* 2-ustun (Chat input uchun) qolgan joyni egallaydi */
     div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
         flex: 1 1 auto !important;
+        width: auto !important;
     }
 
     /* [+] tugmasi uslubi (Aylanali) */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
-        width: 42px !important;
-        height: 42px !important;
+        width: 40px !important;
+        height: 40px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
         border: 1px solid #3d3d3d !important;
-        font-size: 24px !important;
+        font-size: 22px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -79,10 +81,14 @@ st.markdown("""
         padding: 12px !important;
     }
 
-    /* Chat input uslubi */
+    /* Chat input fonini tozalash */
     div[data-testid="stChatInput"] {
-        border-radius: 24px !important;
-        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    div[data-testid="stChatInput"] > div {
+        border: none !important;
+        background: transparent !important;
     }
     
     textarea { spellcheck: false !important; }
@@ -107,7 +113,7 @@ else:
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
     # Pastki qism: Chapda [+] va o'ngda Input
-    col1, col2 = st.columns([1, 15])
+    col1, col2 = st.columns([1, 12])
 
     with col1:
         with st.popover("+"):
