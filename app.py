@@ -118,7 +118,7 @@ else:
     uploaded_file = None
     if st.session_state.show_uploader:
         st.markdown('<div style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 750px; background: #1e1e1e; padding: 12px; border-radius: 12px; border: 1px solid #444; z-index: 1000;">', unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("Rasm yuklang", type=["jpg", "jpeg", "png"])
+        uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Pastki panel: [+] tugmasi va Chat Input yonma-yon
