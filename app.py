@@ -41,6 +41,23 @@ st.markdown("""
         spellcheck: false !important; 
         color: #ffffff !important;
     }
+    .welcome-container {
+        text-align: center;
+        margin-top: 20vh;
+        margin-bottom: 30px;
+    }
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #4b6cb7, #182848);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        color: #888888;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -68,21 +85,27 @@ else:
                 "new_chat": "➕ New Chat",
                 "placeholder": "Ask a question...",
                 "thinking": "Thinking...",
-                "empty": "Empty"
+                "empty": "Empty",
+                "welcome": "Hello!",
+                "subtitle": "How can I help you today?"
             },
             "🇺🇿 O'zbekcha": {
                 "title": "💬 Chatlar tarixi",
                 "new_chat": "➕ Yangi chat",
                 "placeholder": "Savolingizni yozing...",
                 "thinking": "O'ylamoqda...",
-                "empty": "Bo'sh"
+                "empty": "Bo'sh",
+                "welcome": "Salom!",
+                "subtitle": "Bugun sizga qanday yordam bera olaman?"
             },
             "🇷🇺 Русский": {
                 "title": "💬 История чатов",
                 "new_chat": "➕ Новый чат",
                 "placeholder": "Введите ваш вопрос...",
                 "thinking": "Думает...",
-                "empty": "Пусто"
+                "empty": "Пусто",
+                "welcome": "Привет!",
+                "subtitle": "Чем я могу помочь вам сегодня?"
             }
         }
 
@@ -141,10 +164,19 @@ else:
 
     current_messages = st.session_state.chats[st.session_state.current_chat_id]
 
-    # Chat tarixini chiqarish
-    for message in current_messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # Agar chat hali bo'sh bo'lsa, Gemini uslubidagi Welcome oynasini chiqarish
+    if not current_messages:
+        st.markdown(f"""
+            <div class="welcome-container">
+                <div class="welcome-title">{t["welcome"]}</div>
+                <div class="welcome-subtitle">{t["subtitle"]}</div>
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        # Chat tarixini chiqarish
+        for message in current_messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
     # Chat input
     prompt = st.chat_input(t["placeholder"])
@@ -157,7 +189,6 @@ else:
         with st.chat_message("assistant"):
             with st.spinner(t["thinking"]):
                 try:
-                    # Modelga qat'iy qilib aynan foydalanuvchi yozgan tilda javob berishini uqtiramiz
                     full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language (e.g. if it's Uzbek, reply in Uzbek; if Russian, reply in Russian; if English, reply in English). Do not switch to random languages.\n\nText: {prompt}"
                     
                     response = client.models.generate_content(
