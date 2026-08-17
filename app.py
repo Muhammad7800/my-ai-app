@@ -2,19 +2,18 @@ import streamlit as st
 from groq import Groq
 import uuid
 import sqlite3
+import base64
 
 st.set_page_config(
-    page_title="AI Chat", 
+    page_title="AI Vision Chat", 
     page_icon="⚡", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- BAZANI YARATISH VA TEKSHIRISH ---
 def init_db():
     conn = sqlite3.connect('chat_history.db', check_same_thread=False)
     cursor = conn.cursor()
-    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             device_id TEXT,
@@ -23,13 +22,11 @@ def init_db():
             content TEXT
         )
     ''')
-    
     conn.commit()
     return conn
 
 db_conn = init_db()
 
-# --- QURILMANI ANIQLASH ---
 if "device" not in st.query_params:
     st.query_params["device"] = str(uuid.uuid4())
 current_device_id = st.query_params["device"]
@@ -59,88 +56,39 @@ def delete_chat_from_db(conn, device_id, chat_id):
 # --- CSS ---
 st.markdown("""
     <style>
-    #MainMenu, footer, .stDeployButton {
-        display: none !important;
-    }
+    #MainMenu, footer, .stDeployButton { display: none !important; }
     .block-container {
-        padding-bottom: 120px !important;
+        padding-bottom: 130px !important;
         max-width: 800px !important;
         padding-top: 20px !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-    div[data-testid="stChatInput"] {
-        position: fixed !important;
-        bottom: 15px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 92% !important;
-        max-width: 750px !important;
-        background-color: #1a1c23 !important;
-        border-radius: 16px !important;
-        border: 1px solid #333842 !important;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.4) !important;
-        z-index: 999;
-        padding: 4px !important;
-    }
-    div[data-testid="stChatInput"] > div {
-        background-color: transparent !important;
-        border: none !important;
-    }
-    textarea { 
-        spellcheck: false !important; 
-        color: #ffffff !important;
-    }
-    .welcome-container {
-        text-align: center;
-        margin-top: 12vh;
-        margin-bottom: 20px;
-        padding: 0 10px;
-    }
-    .welcome-title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-        background: linear-gradient(90deg, #4b6cb7, #182848);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .welcome-subtitle {
-        font-size: 1.1rem;
-        color: #888888;
     }
     </style>
 """, unsafe_allow_html=True)
 
 api_key = st.secrets.get("GROQ_API_KEY")
 if not api_key:
-    st.error("GROQ_API_KEY topilmadi! Iltimos Streamlit Secrets bo'limini tekshiring.")
+    st.error("GROQ_API_KEY topilmadi!")
 else:
     client = Groq(api_key=api_key)
 
-    # --- CHAP PANEL ---
     with st.sidebar:
         st.markdown("### 💬 Chat History")
-        
         if st.button("➕ New Chat", use_container_width=True):
             st.session_state.current_chat_id = str(uuid.uuid4())
             st.rerun()
-        
         st.divider()
 
         chats = get_all_chats(db_conn, current_device_id)
         chat_ids = list(chats.keys())
-        
         if "current_chat_id" not in st.session_state:
             st.session_state.current_chat_id = chat_ids[0] if chat_ids else str(uuid.uuid4())
 
         for i, cid in enumerate(chat_ids):
-            chat_history = chats[cid]
-            chat_title = chat_history[0]["content"][:18] + "..." if chat_history else f"Chat {i+1}"
-            
+            history = chats[cid]
+            title = history[0]["content"][:18] + "..." if history else f"Chat {i+1}"
             c1, c2 = st.columns([0.75, 0.25])
             with c1:
-                if st.button(chat_title, key=f"open_{cid}", use_container_width=True):
+                if st.button(title, key=f"open_{cid}", use_container_width=True):
                     st.session_state.current_chat_id = cid
                     st.rerun()
             with c2:
@@ -149,42 +97,52 @@ else:
                     st.session_state.current_chat_id = str(uuid.uuid4())
                     st.rerun()
 
-    # --- ASOSIY CHAT OYNASI ---
     current_chat_id = st.session_state.current_chat_id
     current_messages = get_all_chats(db_conn, current_device_id).get(current_chat_id, [])
 
     if not current_messages:
-        st.markdown("""
-            <div class="welcome-container">
-                <div class="welcome-title">Hello!</div>
-                <div class="welcome-subtitle">How can I help you today?</div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; margin-top: 15vh;'>AI Vision Chat</h2>", unsafe_allow_html=True)
     else:
-        for message in current_messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+        for msg in current_messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    prompt = st.chat_input("Ask a question...")
+    # Rasm yuklash tugmasi va input
+    uploaded_file = st.file_uploader("Rasm yuklash (ixtiyoriy)", type=["png", "jpg", "jpeg"])
+    prompt = st.chat_input("Xabar yozing...")
 
-    if prompt:
-        save_message(db_conn, current_device_id, current_chat_id, "user", prompt)
+    if prompt or uploaded_file:
+        user_content = prompt if prompt else "Ushbu rasmni tahlil qilib bering:"
+        if uploaded_file:
+            bytes_data = uploaded_file.getvalue()
+            base64_image = base64.b64encode(bytes_data).decode('utf-8')
+            # Multimodal format uchun tayyorlash
+            content_payload = [
+                {"type": "text", "text": user_content},
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+            ]
+        else:
+            content_payload = user_content
+
+        save_message(db_conn, current_device_id, current_chat_id, "user", user_content)
         with st.chat_message("user"):
-            st.markdown(prompt)
+            if uploaded_file:
+                st.image(uploaded_file, width=250)
+            st.markdown(user_content)
 
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("O'ylamoqda..."):
                 try:
+                    # Vision model ishlatiladi
                     response = client.chat.completions.create(
-                        model="openai/gpt-oss-20b",
-                        messages=[{"role": m["role"], "content": m["content"]} for m in current_messages] + [{"role": "user", "content": prompt}],
+                        model="llama-3.2-11b-vision-preview",
+                        messages=[{"role": "user", "content": content_payload}],
                         temperature=0.7
                     )
                     bot_reply = response.choices[0].message.content
                 except Exception as e:
-                    bot_reply = f"Error: {e}"
+                    bot_reply = f"Xatolik: {e}"
 
                 st.markdown(bot_reply)
                 save_message(db_conn, current_device_id, current_chat_id, "assistant", bot_reply)
-        
         st.rerun()
