@@ -175,9 +175,8 @@ else:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    # Model o'zgartirildi:
                     response = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",
+                        model="llama3-70b-8192",
                         messages=[{"role": m["role"], "content": m["content"]} for m in current_messages] + [{"role": "user", "content": prompt}],
                         temperature=0.7
                     )
