@@ -87,6 +87,7 @@ st.markdown("""
     
     div[data-testid="stChatInput"] textarea {
         font-size: 14px !important;
+        spellcheck: false !important;
     }
 
     textarea {
@@ -137,7 +138,7 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=220)
 
-    # --- PASTKI QISM: Chapda [+] popover va o'ngda chat input ---
+    # Pastki qism: Chapda [+] popover va o'ngda chat input
     col1, col2 = st.columns([0.8, 12])
 
     with col1:
