@@ -10,12 +10,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- QURILMANI ANIqlash (Har bir qurilma uchun alohida ID) ---
+if "device" not in st.query_params:
+    st.query_params["device"] = str(uuid.uuid4())
+current_device_id = st.query_params["device"]
+
 # --- BAZANI YARATISH VA ULANISH ---
 def init_db():
     conn = sqlite3.connect('chat_history.db', check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
+            device_id TEXT,
             chat_id TEXT,
             role TEXT,
             content TEXT
@@ -26,26 +32,26 @@ def init_db():
 
 db_conn = init_db()
 
-def get_all_chats(conn):
+def get_all_chats(conn, device_id):
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT chat_id FROM messages")
+    cursor.execute("SELECT DISTINCT chat_id FROM messages WHERE device_id = ?", (device_id,))
     rows = cursor.fetchall()
     chats = {}
     for row in rows:
         cid = row[0]
-        cursor.execute("SELECT role, content FROM messages WHERE chat_id = ?", (cid,))
+        cursor.execute("SELECT role, content FROM messages WHERE device_id = ? AND chat_id = ?", (device_id, cid))
         messages = [{"role": r[0], "content": r[1]} for r in cursor.fetchall()]
         chats[cid] = messages
     return chats
 
-def save_message(conn, chat_id, role, content):
+def save_message(conn, device_id, chat_id, role, content):
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO messages (chat_id, role, content) VALUES (?, ?, ?)", (chat_id, role, content))
+    cursor.execute("INSERT INTO messages (device_id, chat_id, role, content) VALUES (?, ?, ?, ?)", (device_id, chat_id, role, content))
     conn.commit()
 
-def delete_chat_from_db(conn, chat_id):
+def delete_chat_from_db(conn, device_id, chat_id):
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM messages WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM messages WHERE device_id = ? AND chat_id = ?", (device_id, chat_id))
     conn.commit()
 
 # --- CSS ---
@@ -110,8 +116,8 @@ if not api_key:
 else:
     client = genai.Client(api_key=api_key)
 
-    # Chatlarni bazadan yuklab olish
-    chats = get_all_chats(db_conn)
+    # Shu qurilmaga tegishli chatlarni olish
+    chats = get_all_chats(db_conn, current_device_id)
 
     if "current_chat_id" not in st.session_state:
         if chats:
@@ -131,7 +137,7 @@ else:
         
         st.divider()
 
-        chats = get_all_chats(db_conn)
+        chats = get_all_chats(db_conn, current_device_id)
         chat_ids = list(chats.keys())
         
         for i, cid in enumerate(chat_ids):
@@ -148,8 +154,8 @@ else:
                     st.rerun()
             with c2:
                 if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
-                    delete_chat_from_db(db_conn, cid)
-                    remaining_chats = get_all_chats(db_conn)
+                    delete_chat_from_db(db_conn, current_device_id, cid)
+                    remaining_chats = get_all_chats(db_conn, current_device_id)
                     if remaining_chats:
                         st.session_state.current_chat_id = list(remaining_chats.keys())[0]
                     else:
@@ -157,7 +163,7 @@ else:
                     st.rerun()
 
     # --- ASOSIY CHAT OYNASI ---
-    chats = get_all_chats(db_conn)
+    chats = get_all_chats(db_conn, current_device_id)
     current_chat_id = st.session_state.current_chat_id
     current_messages = chats.get(current_chat_id, [])
 
@@ -176,7 +182,7 @@ else:
     prompt = st.chat_input("Ask a question...")
 
     if prompt:
-        save_message(db_conn, current_chat_id, "user", prompt)
+        save_message(db_conn, current_device_id, current_chat_id, "user", prompt)
         with st.chat_message("user"):
             st.markdown(prompt)
 
@@ -194,6 +200,6 @@ else:
                     bot_reply = f"Error / Xatolik: {e}"
 
                 st.markdown(bot_reply)
-                save_message(db_conn, current_chat_id, "assistant", bot_reply)
+                save_message(db_conn, current_device_id, current_chat_id, "assistant", bot_reply)
         
         st.rerun()
