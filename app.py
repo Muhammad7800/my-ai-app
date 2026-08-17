@@ -2,7 +2,6 @@ import streamlit as st
 from google import genai
 import uuid
 
-# Sahifa sozlamalari
 st.set_page_config(
     page_title="Gemini AI", 
     page_icon="⚡", 
@@ -67,14 +66,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# API ni sozlash
 api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     st.error("API Kalit kiritilmagan!")
 else:
     client = genai.Client(api_key=api_key)
 
-    # Sessiyalar va chatlar tarixini boshqarish
     if "chats" not in st.session_state:
         st.session_state.chats = {}
     
@@ -83,11 +80,10 @@ else:
         st.session_state.current_chat_id = initial_id
         st.session_state.chats[initial_id] = []
 
-    # --- CHAP CHETDAGI PANEL (Faqat chat tarixi va yangi chat uchun) ---
+    # --- CHAP PANEL ---
     with st.sidebar:
         st.markdown("### 💬 Chat History")
         
-        # Yangi chat ochish tugmasi
         if st.button("➕ New Chat", use_container_width=True):
             new_id = str(uuid.uuid4())
             st.session_state.chats[new_id] = []
@@ -96,7 +92,6 @@ else:
         
         st.divider()
 
-        # Chatlar tarixi ro'yxati va o'chirish imkoniyati
         chat_ids = list(st.session_state.chats.keys())
         for i, cid in enumerate(chat_ids):
             chat_history = st.session_state.chats[cid]
@@ -127,7 +122,7 @@ else:
 
     current_messages = st.session_state.chats[st.session_state.current_chat_id]
 
-    # Welcome ekrani yoki chat tarixi
+    # Xabarlar yoki xush kelibsiz ekranini chiqarish
     if not current_messages:
         st.markdown("""
             <div class="welcome-container">
@@ -140,18 +135,19 @@ else:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    # Chat input
+    # Chat input (Xabar yuborish)
     prompt = st.chat_input("Ask a question...")
 
     if prompt:
+        # Foydalanuvchi xabarini qo'shish va ekranga chiqarish
         current_messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
+        # Bot javobini olish
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    # Foydalanuvchi qaysi tilda yozgan bo'lsa, xuddi o'sha tilda javob berishini talab qilamiz
                     full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language. Do not switch to other languages.\n\nText: {prompt}"
                     
                     response = client.models.generate_content(
@@ -164,5 +160,3 @@ else:
 
                 st.markdown(bot_reply)
                 current_messages.append({"role": "assistant", "content": bot_reply})
-        
-        st.rerun()
