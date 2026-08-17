@@ -63,7 +63,7 @@ else:
             st.markdown(message["content"])
 
     # Chat input
-    prompt = st.chat_input("Savolingizni yozing...")
+    prompt = st.chat_input("Ask a question...")
 
     if prompt:
         with st.chat_message("user"):
