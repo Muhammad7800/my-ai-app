@@ -13,6 +13,26 @@ st.markdown("""
         display: none !important;
     }
 
+    /* Asosiy kontent pastki qismdagi inputga yopib qolmasligi uchun bo'sh joy */
+    .block-container {
+        padding-bottom: 100px !important;
+        max-width: 750px !important;
+    }
+
+    /* Pastdagi input va [+] tugmasi turgan qismni ekranning pastiga qadash (fixed) */
+    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 750px;
+        background-color: #0e1117;
+        padding: 12px 16px;
+        z-index: 100;
+        box-sizing: border-box;
+    }
+
     /* Popover (+) tugmasini aylanali qilib bezash */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
@@ -26,7 +46,7 @@ st.markdown("""
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
     }
 
     div[data-testid="stPopover"] > button:hover {
@@ -45,11 +65,17 @@ st.markdown("""
     /* Pastki elementlarni bitta qatorga tekislash */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
+        max-width: 750px;
+        margin: 0 auto;
     }
 
     /* Chat input-ni chiroyli qilish */
     div[data-testid="stChatInput"] {
         border-radius: 24px !important;
+    }
+    
+    textarea {
+        spellcheck: false !important;
     }
     </style>
 """, unsafe_allow_html=True)
