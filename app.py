@@ -151,13 +151,11 @@ else:
 
         lang_keys = list(languages.keys())
 
-        # Agar oldin til tanlangan bo'lsa, uning indexini topib qo'shamiz (shunda o'chib ketmaydi)
         if "selected_lang" not in st.session_state:
             st.session_state.selected_lang = "🇬🇧 English"
         
         current_index = lang_keys.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_keys else 0
 
-        # Til tanlash menyusi
         selected_lang = st.selectbox("🌐 Language / Til", lang_keys, index=current_index)
         st.session_state.selected_lang = selected_lang
         t = languages[selected_lang]
@@ -174,18 +172,40 @@ else:
         
         st.divider()
 
-        # Chatlar tarixi ro'yxati
+        # Chatlar tarixi ro'yxati va har birini o'chirish imkoniyati
         chat_ids = list(st.session_state.chats.keys())
         for i, cid in enumerate(chat_ids):
             chat_history = st.session_state.chats[cid]
             if chat_history:
-                chat_title = chat_history[0]["content"][:25] + "..."
+                chat_title = chat_history[0]["content"][:20] + "..."
             else:
                 chat_title = f"Chat {i+1} ({t['empty']})"
             
-            if st.button(chat_title, key=cid, use_container_width=True):
-                st.session_state.current_chat_id = cid
-                st.rerun()
+            # Har bir chat qatorini ustunlarga bo'lish (Chatni ochish va o'chirish tugmasi uchun)
+            col1, col2 = st.columns([0.8, 0.2])
+            
+            with col1:
+                if st.button(chat_title, key=f"open_{cid}", use_container_width=True):
+                    st.session_state.current_chat_id = cid
+                    st.rerun()
+            
+            with col2:
+                if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
+                    # Chatni o'chirish
+                    del st.session_state.chats[cid]
+                    # Agar hamma chatlar o'chib ketsa, yangi bo'sh chat ochish
+                    if not st.session_state.chats:
+                        new_id = str(uuid.uuid4())
+                        st.session_state.chats[new_id] = []
+                        st.session_state.current_chat_id = new_id
+                    elif st.session_state.current_chat_id == cid:
+                        # Agar o'chirilgan chat hozir ochilgan bo'lsa, boshqa mavjud chatga o'tish
+                        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
+                    st.rerun()
+
+    # Agar joriy chat ID xatolik tufayli mavjud bo'lmasa, uni to'g'rilash
+    if st.session_state.current_chat_id not in st.session_state.chats:
+        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
 
     # Joriy chat xabarlari
     current_messages = st.session_state.chats[st.session_state.current_chat_id]
