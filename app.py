@@ -14,11 +14,11 @@ st.markdown("""
 
     /* Asosiy kontent pastga yopishmasligi uchun */
     .block-container {
-        padding-bottom: 100px !important;
+        padding-bottom: 110px !important;
         max-width: 750px !important;
     }
 
-    /* Chat inputni pastda fiks qilish */
+    /* Chat input konteynerini zamonaviy va yaxlit qilish */
     div[data-testid="stChatInput"] {
         position: fixed !important;
         bottom: 15px !important;
@@ -26,10 +26,24 @@ st.markdown("""
         transform: translateX(-50%) !important;
         width: 95% !important;
         max-width: 750px !important;
+        background-color: #1a1c23 !important;
+        border-radius: 16px !important;
+        border: 1px solid #333842 !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4) !important;
         z-index: 999;
+        padding: 4px !important;
     }
-    
-    textarea { spellcheck: false !important; }
+
+    /* Ichki elementlarni tozalash va to'g'rilash */
+    div[data-testid="stChatInput"] > div {
+        background-color: transparent !important;
+        border: none !important;
+    }
+
+    textarea { 
+        spellcheck: false !important; 
+        color: #ffffff !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
