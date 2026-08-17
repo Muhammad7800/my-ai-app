@@ -6,7 +6,7 @@ import base64
 # Tab sarlavhasi va ikonkasini o'rnatish
 st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
 
-# --- TO'LIQ VA YANGILANGAN DIZAYN (CSS) ---
+# --- ZAMONAVIY VA IXCHAM DIZAYN (CSS) ---
 st.markdown("""
     <style>
     /* Streamlit asosiy menyulari va headerlarni yashirish */
@@ -31,7 +31,7 @@ st.markdown("""
         max-width: 750px !important;
     }
 
-    /* Pastdagi yozish qismini cho'zib yubormasdan, ixcham va markazda saqlash */
+    /* Pastdagi yozish qismini ixcham va markazda saqlash */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
         position: fixed;
         bottom: 0;
@@ -45,7 +45,7 @@ st.markdown("""
         box-sizing: border-box;
     }
 
-    /* [+] popover tugmasini aniq ko'rinadigan va chiroyli qilish */
+    /* [+] popover tugmasi */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
         width: 38px !important;
@@ -88,6 +88,21 @@ st.markdown("""
     div[data-testid="stChatInput"] textarea {
         font-size: 14px !important;
     }
+
+    /* Boshlang'ich sahifa sarlavhasi dizayni */
+    .welcome-container {
+        text-align: center;
+        margin-top: 25vh;
+        color: #e3e3e3;
+    }
+    .welcome-title {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #4285F4, #9B72CB, #D96570);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -101,6 +116,15 @@ else:
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
+
+    # Agar chat tarixi bo'sh bo'lsa - Gemini'nikiga o'xshash salomlashish ekrani chiqadi
+    if len(st.session_state.messages) == 0:
+        st.markdown("""
+            <div class="welcome-container">
+                <div class="welcome-title">Hello, Muhammad</div>
+                <div style="font-size: 24px; color: #888888;">What can I help you with today?</div>
+            </div>
+        """, unsafe_allow_html=True)
 
     # Chat tarixini ko'rsatish
     for message in st.session_state.messages:
@@ -158,4 +182,3 @@ else:
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
 
         st.rerun()
-        
