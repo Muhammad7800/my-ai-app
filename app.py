@@ -24,7 +24,6 @@ def init_db():
         )
     ''')
     
-    # Eski jadvalda device_id ustuni yo'q bo'lsa, xatolik chiqmasligi uchun tekshiramiz va yangilaymiz
     try:
         cursor.execute("SELECT device_id FROM messages LIMIT 1")
     except sqlite3.OperationalError:
