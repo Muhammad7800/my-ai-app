@@ -33,40 +33,36 @@ st.markdown("""
         box-sizing: border-box;
     }
 
-    /* Ustunlarni bitta qatorga va chiroyli ramkaga olish */
+    /* Ustunlarni bitta qatorga tekislash va oraliq ochish */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         align-items: center !important;
-        gap: 8px !important;
-        background-color: #0e1117;
-        padding: 8px 12px;
-        border-radius: 28px;
-        border: 1px solid #333333;
+        gap: 12px !important;
     }
 
-    /* Ustun kengliklarini to'g'rilash */
+    /* Ustun kengliklarini to'g'rilash (Tugma uchun kichik, input uchun katta joy) */
     div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        flex: 0 0 auto !important;
-        width: auto !important;
+        flex: 0 0 45px !important;
+        width: 45px !important;
     }
     div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
         flex: 1 1 auto !important;
-        width: auto !important;
     }
 
-    /* [+] tugmasi uslubi (Aylanali) */
+    /* [+] tugmasi uslubi (Aylanali va tashqarida) */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
-        width: 40px !important;
-        height: 40px !important;
+        width: 45px !important;
+        height: 45px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
         border: 1px solid #3d3d3d !important;
-        font-size: 22px !important;
+        font-size: 24px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     div[data-testid="stPopover"] > button:hover {
@@ -79,16 +75,6 @@ st.markdown("""
         border: 1px solid #333333 !important;
         border-radius: 16px !important;
         padding: 12px !important;
-    }
-
-    /* Chat input fonini tozalash */
-    div[data-testid="stChatInput"] {
-        border: none !important;
-        background: transparent !important;
-    }
-    div[data-testid="stChatInput"] > div {
-        border: none !important;
-        background: transparent !important;
     }
     
     textarea { spellcheck: false !important; }
@@ -112,8 +98,8 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Pastki qism: Chapda [+] va o'ngda Input
-    col1, col2 = st.columns([1, 12])
+    # Pastki qism: Chapda tashqarida [+] va o'ngda Chat Input
+    col1, col2 = st.columns([1, 15])
 
     with col1:
         with st.popover("+"):
