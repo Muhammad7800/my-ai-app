@@ -3,62 +3,30 @@ from google import genai
 from PIL import Image
 import base64
 
-# Tab sarlavhasi va ikonkasini o'rnatish
-st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Gemini AI", page_icon="⚡", layout="centered")
 
-# --- ZAMONAVIY VA IXCHAM DIZAYN (CSS) ---
+# --- UI DIZAYNINI O'ZGARTIRISH (CSS) ---
 st.markdown("""
     <style>
-    /* Streamlit asosiy menyulari va headerlarni yashirish */
+    /* Streamlit menyulari va sarlavhalarini yashirish */
     #MainMenu, header, footer, .stAppHeader, .stDeployButton, [data-testid="stToolbar"] {
         display: none !important;
     }
 
-    /* "Manage app" tugmasini kichraytirib, burchakka yashirish */
-    div[class*="viewerBadge"], [data-testid="manage-app-button"] {
-        transform: scale(0.65) !important;
-        transform-origin: bottom right !important;
-        opacity: 0.4 !important;
-        transition: opacity 0.3s ease !important;
-    }
-    div[class*="viewerBadge"]:hover, [data-testid="manage-app-button"]:hover {
-        opacity: 1 !important;
-    }
-
-    /* Asosiy kontent blokini pastga joylashishga moslash */
-    .block-container {
-        padding-bottom: 90px !important;
-        max-width: 750px !important;
-    }
-
-    /* Pastdagi yozish qismini ixcham va markazda saqlash */
-    div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        max-width: 750px;
-        background-color: #0e1117;
-        padding: 10px 16px;
-        z-index: 100;
-        box-sizing: border-box;
-    }
-
-    /* [+] popover tugmasini chap tarafga chiroyli joylashtirish */
+    /* Popover (+) tugmasini aylanali qilib bezash */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
-        width: 38px !important;
-        height: 38px !important;
+        width: 42px !important;
+        height: 42px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
         border: 1px solid #3d3d3d !important;
-        font-size: 22px !important;
+        font-size: 24px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        margin-top: 6px !important;
+        margin-bottom: 4px !important;
     }
 
     div[data-testid="stPopover"] > button:hover {
@@ -66,51 +34,26 @@ st.markdown("""
         border-color: #555555 !important;
     }
 
+    /* Popover ichidagi menyuni qorong'i uslubga o'tkazish */
     div[data-testid="stPopoverBody"] {
         background-color: #212121 !important;
         border: 1px solid #333333 !important;
-        border-radius: 14px !important;
-        padding: 10px !important;
+        border-radius: 16px !important;
+        padding: 12px !important;
     }
 
+    /* Pastki elementlarni bitta qatorga tekislash */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
-        max-width: 750px;
-        margin: 0 auto;
     }
 
-    /* Chat input katagini ixcham qilish va qizil chiziqni o'chirish */
+    /* Chat input-ni chiroyli qilish */
     div[data-testid="stChatInput"] {
-        border-radius: 20px !important;
-        min-height: 38px !important;
-    }
-    
-    div[data-testid="stChatInput"] textarea {
-        font-size: 14px !important;
-    }
-
-    textarea {
-        spellcheck: false !important;
-    }
-
-    /* Boshlang'ich sahifa sarlavhasi dizayni */
-    .welcome-container {
-        text-align: center;
-        margin-top: 25vh;
-        color: #e3e3e3;
-    }
-    .welcome-title {
-        font-size: 32px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        background: linear-gradient(90deg, #4285F4, #9B72CB, #D96570);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        border-radius: 24px !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# API Kalitini olish
 api_key = st.secrets.get("GEMINI_API_KEY")
 
 if not api_key:
@@ -121,32 +64,24 @@ else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Agar chat tarixi bo'sh bo'lsa - Gemini'nikiga o'xshash salomlashish ekrani chiqadi
-    if len(st.session_state.messages) == 0:
-        st.markdown("""
-            <div class="welcome-container">
-                <div class="welcome-title">Hello, Muhammad</div>
-                <div style="font-size: 24px; color: #888888;">What can I help you with today?</div>
-            </div>
-        """, unsafe_allow_html=True)
-
     # Chat tarixini ko'rsatish
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if message.get("image_base64"):
-                st.image(base64.b64decode(message["image_base64"]), width=220)
+                st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Pastki qism: Chapda [+] popover va o'ngda chat input
-    col1, col2 = st.columns([0.6, 11.4])
+    # Pastki kiritish qatori: [+] Popover tugmasi va Chat Input
+    col1, col2 = st.columns([1, 12])
 
     with col1:
+        # [+] tugmasi bosilganda ochiladigan popup menyu
         with st.popover("+"):
-            st.markdown("📎 **Attach file**")
-            uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+            st.markdown("📎 **Fayl biriktirish**")
+            uploaded_file = st.file_uploader("Rasm yuklang", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
     with col2:
-        prompt = st.chat_input("Type a message...")
+        prompt = st.chat_input("Savolingizni yozing...")
 
     if prompt:
         img = Image.open(uploaded_file) if uploaded_file else None
@@ -156,10 +91,11 @@ else:
             uploaded_file.seek(0)
             image_base64 = base64.b64encode(uploaded_file.read()).decode()
 
+        # Foydalanuvchi xabari
         with st.chat_message("user"):
             st.markdown(prompt)
             if img:
-                st.image(img, width=220)
+                st.image(img, width=250)
 
         user_msg = {"role": "user", "content": prompt}
         if image_base64:
