@@ -6,45 +6,57 @@ import base64
 # Tab sarlavhasi va ikonkasini o'rnatish
 st.set_page_config(page_title="Muhammad AI", page_icon="🤖", layout="centered")
 
-# --- TO'LIQ UI DIZAYNI (CSS) ---
+# --- IXCHAM VA TOZA DIZAYN (CSS) ---
 st.markdown("""
     <style>
-    /* Barcha Streamlit menyulari, "Manage app", header, footer va logolarni butunlay yashirish */
-    #MainMenu, header, footer, .stAppHeader, .stDeployButton, [data-testid="stToolbar"], [data-testid="manage-app-button"], div[class*="viewerBadge"], footer {
+    /* Streamlit asosiy menyulari va headerlarni yashirish */
+    #MainMenu, header, footer, .stAppHeader, .stDeployButton, [data-testid="stToolbar"] {
         display: none !important;
+    }
+
+    /* "Manage app" tugmasini kichraytirib, burchakka yashirish (ixcham holatda) */
+    div[class*="viewerBadge"], [data-testid="manage-app-button"] {
+        transform: scale(0.65) !important;
+        transform-origin: bottom right !important;
+        opacity: 0.4 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    div[class*="viewerBadge"]:hover, [data-testid="manage-app-button"]:hover {
+        opacity: 1 !important;
     }
 
     /* Asosiy kontent blokini pastga joylashishga moslash */
     .block-container {
-        padding-bottom: 100px !important;
+        padding-bottom: 90px !important;
+        max-width: 750px !important;
     }
 
-    /* Chat input va tugma joylashgan pastki qismni sahifaning eng pastiga qadash */
+    /* Pastdagi yozish qismini ixcham qilish */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stChatInput"]) {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
         background-color: #0e1117;
-        padding: 10px 20px;
+        padding: 8px 16px;
         z-index: 100;
         box-sizing: border-box;
     }
 
-    /* [+] popover tugmasi */
+    /* [+] popover tugmasini kichikroq va ixcham qilish */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
-        width: 42px !important;
-        height: 42px !important;
+        width: 36px !important;
+        height: 36px !important;
         padding: 0 !important;
         background-color: #212121 !important;
         color: #ffffff !important;
         border: 1px solid #3d3d3d !important;
-        font-size: 24px !important;
+        font-size: 20px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
     }
 
     div[data-testid="stPopover"] > button:hover {
@@ -55,18 +67,24 @@ st.markdown("""
     div[data-testid="stPopoverBody"] {
         background-color: #212121 !important;
         border: 1px solid #333333 !important;
-        border-radius: 16px !important;
-        padding: 12px !important;
+        border-radius: 14px !important;
+        padding: 10px !important;
     }
 
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
-        max-width: 800px;
+        max-width: 750px;
         margin: 0 auto;
     }
 
+    /* Chat input katagini ixcham va chiroyli qilish */
     div[data-testid="stChatInput"] {
-        border-radius: 24px !important;
+        border-radius: 20px !important;
+        min-height: 38px !important;
+    }
+    
+    div[data-testid="stChatInput"] textarea {
+        font-size: 14px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -87,10 +105,10 @@ else:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if message.get("image_base64"):
-                st.image(base64.b64decode(message["image_base64"]), width=250)
+                st.image(base64.b64decode(message["image_base64"]), width=220)
 
     # Pastki qism: [+] popover va chat input
-    col1, col2 = st.columns([1, 12])
+    col1, col2 = st.columns([0.8, 12])
 
     with col1:
         with st.popover("+"):
@@ -98,7 +116,7 @@ else:
             uploaded_file = st.file_uploader("Rasm yuklang", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
     with col2:
-        prompt = st.chat_input("Savolingizni yozing...")
+        prompt = st.chat_input("Xabar yozing...")
 
     if prompt:
         img = Image.open(uploaded_file) if uploaded_file else None
@@ -111,7 +129,7 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
             if img:
-                st.image(img, width=250)
+                st.image(img, width=220)
 
         user_msg = {"role": "user", "content": prompt}
         if image_base64:
