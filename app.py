@@ -2,8 +2,13 @@ import streamlit as st
 from google import genai
 import uuid
 
-# Sahifa sozlamalari
-st.set_page_config(page_title="Gemini AI", page_icon="⚡", layout="wide")
+# Sahifa sozlamalari (sidebar doim ochiq turishi uchun initial_sidebar_state qo'shildi)
+st.set_page_config(
+    page_title="Gemini AI", 
+    page_icon="⚡", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # --- CSS DIZAYN ---
 st.markdown("""
@@ -114,7 +119,7 @@ else:
     lang_keys = list(languages.keys())
     t = languages[st.session_state.selected_lang]
 
-    # --- CHAP CHETDAGI STANDART PANEL (SIDEBAR) ---
+    # --- CHAP CHETDAGI PANEL (SIDEBAR) ---
     with st.sidebar:
         current_index = lang_keys.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_keys else 0
         selected_lang = st.selectbox("🌐 Language / Til", lang_keys, index=current_index)
