@@ -63,19 +63,19 @@ else:
     # --- YON PANEL (SIDEBAR) VA TILLAR ---
     with st.sidebar:
         languages = {
-            "🇺🇿 O'zbekcha": {
-                "title": "💬 Chatlar tarixi",
-                "new_chat": "➕ Yangi chat",
-                "placeholder": "Savolingizni yozing...",
-                "thinking": "O'ylamoqda...",
-                "empty": "Bo'sh"
-            },
             "🇬🇧 English": {
                 "title": "💬 Chat History",
                 "new_chat": "➕ New Chat",
                 "placeholder": "Ask a question...",
                 "thinking": "Thinking...",
                 "empty": "Empty"
+            },
+            "🇺🇿 O'zbekcha": {
+                "title": "💬 Chatlar tarixi",
+                "new_chat": "➕ Yangi chat",
+                "placeholder": "Savolingizni yozing...",
+                "thinking": "O'ylamoqda...",
+                "empty": "Bo'sh"
             },
             "🇷🇺 Русский": {
                 "title": "💬 История чатов",
@@ -149,8 +149,8 @@ else:
             }
         }
 
-        # Til tanlash menyusi
-        selected_lang = st.selectbox("🌐 Language / Til", list(languages.keys()))
+        # Birinchi kirganda English tanlanib turishi uchun index=0 (chunki ro'yxatda birinchi turibdi)
+        selected_lang = st.selectbox("🌐 Language / Til", list(languages.keys()), index=0)
         t = languages[selected_lang]
 
         st.divider()
