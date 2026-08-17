@@ -45,7 +45,7 @@ st.markdown("""
         box-sizing: border-box;
     }
 
-    /* [+] popover tugmasi */
+    /* [+] popover tugmasini chap tarafga chiroyli joylashtirish */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
         width: 38px !important;
@@ -89,7 +89,6 @@ st.markdown("""
         font-size: 14px !important;
     }
 
-    /* Brauzerning imlo xatosi ostidagi qizil chizig'ini yashirish */
     textarea {
         spellcheck: false !important;
     }
@@ -138,7 +137,7 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=220)
 
-    # Pastki qism: [+] popover va chat input
+    # --- PASTKI QISM: Chapda [+] popover va o'ngda chat input ---
     col1, col2 = st.columns([0.8, 12])
 
     with col1:
