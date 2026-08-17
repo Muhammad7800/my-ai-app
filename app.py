@@ -3,7 +3,7 @@ from google import genai
 import uuid
 
 # Sahifa sozlamalari
-st.set_page_config(page_title="Gemini AI", page_icon="⚡", layout="centered")
+st.set_page_config(page_title="Gemini AI", page_icon="⚡", layout="wide")
 
 # --- CSS DIZAYN ---
 st.markdown("""
@@ -18,7 +18,7 @@ st.markdown("""
     .block-container {
         padding-bottom: 110px !important;
         max-width: 800px !important;
-        padding-top: 20px !important;
+        padding-top: 30px !important;
     }
     div[data-testid="stChatInput"] {
         position: fixed !important;
@@ -81,10 +81,6 @@ else:
     if "selected_lang" not in st.session_state:
         st.session_state.selected_lang = "🇬🇧 English"
 
-    # Menyuni ochish/yopish holati (True - ochiq, False - yopiq)
-    if "sidebar_open" not in st.session_state:
-        st.session_state.sidebar_open = True
-
     languages = {
         "🇬🇧 English": {
             "title": "💬 Chat History",
@@ -118,108 +114,92 @@ else:
     lang_keys = list(languages.keys())
     t = languages[st.session_state.selected_lang]
 
-    # --- YUQORIGI BOSHQARUV TUGMASI (MENU) ---
-    col_btn, _ = st.columns([1, 10])
-    with col_btn:
-        if st.button("☰ Menu", use_container_width=True):
-            st.session_state.sidebar_open = not st.session_state.sidebar_open
+    # --- CHAP CHETDAGI STANDART PANEL (SIDEBAR) ---
+    with st.sidebar:
+        current_index = lang_keys.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_keys else 0
+        selected_lang = st.selectbox("🌐 Language / Til", lang_keys, index=current_index)
+        if selected_lang != st.session_state.selected_lang:
+            st.session_state.selected_lang = selected_lang
             st.rerun()
 
-    # --- ASOSIY LAYOUT (Menyu ochiq yoki yopiqligiga qarab) ---
-    if st.session_state.sidebar_open:
-        main_col1, main_col2 = st.columns([1.2, 2.8])
+        st.divider()
+        st.markdown(f"### {t['title']}")
+        
+        # Yangi chat ochish tugmasi
+        if st.button(t["new_chat"], use_container_width=True):
+            new_id = str(uuid.uuid4())
+            st.session_state.chats[new_id] = []
+            st.session_state.current_chat_id = new_id
+            st.rerun()
+        
+        st.divider()
+
+        # Chatlar tarixi ro'yxati va o'chirish imkoniyati
+        chat_ids = list(st.session_state.chats.keys())
+        for i, cid in enumerate(chat_ids):
+            chat_history = st.session_state.chats[cid]
+            if chat_history:
+                chat_title = chat_history[0]["content"][:18] + "..."
+            else:
+                chat_title = f"Chat {i+1} ({t['empty']})"
+            
+            c1, c2 = st.columns([0.75, 0.25])
+            with c1:
+                if st.button(chat_title, key=f"open_{cid}", use_container_width=True):
+                    st.session_state.current_chat_id = cid
+                    st.rerun()
+            with c2:
+                if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
+                    del st.session_state.chats[cid]
+                    if not st.session_state.chats:
+                        new_id = str(uuid.uuid4())
+                        st.session_state.chats[new_id] = []
+                        st.session_state.current_chat_id = new_id
+                    elif st.session_state.current_chat_id == cid:
+                        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
+                    st.rerun()
+
+    # --- ASOSIY CHAT OYNASI ---
+    if st.session_state.current_chat_id not in st.session_state.chats:
+        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
+
+    current_messages = st.session_state.chats[st.session_state.current_chat_id]
+
+    # Welcome ekrani yoki chat tarixi
+    if not current_messages:
+        st.markdown(f"""
+            <div class="welcome-container">
+                <div class="welcome-title">{t["welcome"]}</div>
+                <div class="welcome-subtitle">{t["subtitle"]}</div>
+            </div>
+        """, unsafe_allow_html=True)
     else:
-        main_col1 = None
-        main_col2 = st.container()
+        for message in current_messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
-    # --- CHAP PANEL (MENU) ---
-    if st.session_state.sidebar_open:
-        with main_col1:
-            current_index = lang_keys.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_keys else 0
-            selected_lang = st.selectbox("🌐 Language / Til", lang_keys, index=current_index, key="lang_select")
-            if selected_lang != st.session_state.selected_lang:
-                st.session_state.selected_lang = selected_lang
-                st.rerun()
+    # Chat input
+    prompt = st.chat_input(t["placeholder"])
 
-            st.divider()
-            st.markdown(f"### {t['title']}")
-            
-            # Yangi chat ochish tugmasi
-            if st.button(t["new_chat"], use_container_width=True):
-                new_id = str(uuid.uuid4())
-                st.session_state.chats[new_id] = []
-                st.session_state.current_chat_id = new_id
-                st.rerun()
-            
-            st.divider()
+    if prompt:
+        current_messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-            # Chatlar tarixi ro'yxati va o'chirish imkoniyati
-            chat_ids = list(st.session_state.chats.keys())
-            for i, cid in enumerate(chat_ids):
-                chat_history = st.session_state.chats[cid]
-                if chat_history:
-                    chat_title = chat_history[0]["content"][:18] + "..."
-                else:
-                    chat_title = f"Chat {i+1} ({t['empty']})"
-                
-                c1, c2 = st.columns([0.75, 0.25])
-                with c1:
-                    if st.button(chat_title, key=f"open_{cid}", use_container_width=True):
-                        st.session_state.current_chat_id = cid
-                        st.rerun()
-                with c2:
-                    if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
-                        del st.session_state.chats[cid]
-                        if not st.session_state.chats:
-                            new_id = str(uuid.uuid4())
-                            st.session_state.chats[new_id] = []
-                            st.session_state.current_chat_id = new_id
-                        elif st.session_state.current_chat_id == cid:
-                            st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
-                        st.rerun()
+        with st.chat_message("assistant"):
+            with st.spinner(t["thinking"]):
+                try:
+                    full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language (e.g. if it's Uzbek, reply in Uzbek; if Russian, reply in Russian; if English, reply in English). Do not switch to random languages.\n\nText: {prompt}"
+                    
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash", 
+                        contents=full_prompt
+                    )
+                    bot_reply = response.text
+                except Exception as e:
+                    bot_reply = f"Error / Xatolik: {e}"
 
-    # --- O'NG TARAHDAGI CHAT OYNASI ---
-    with main_col2:
-        if st.session_state.current_chat_id not in st.session_state.chats:
-            st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
-
-        current_messages = st.session_state.chats[st.session_state.current_chat_id]
-
-        # Welcome ekrani yoki chat tarixi
-        if not current_messages:
-            st.markdown(f"""
-                <div class="welcome-container">
-                    <div class="welcome-title">{t["welcome"]}</div>
-                    <div class="welcome-subtitle">{t["subtitle"]}</div>
-                </div>
-            """, unsafe_allow_html=True)
-        else:
-            for message in current_messages:
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
-
-        # Chat input
-        prompt = st.chat_input(t["placeholder"])
-
-        if prompt:
-            current_messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            with st.chat_message("assistant"):
-                with st.spinner(t["thinking"]):
-                    try:
-                        full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language (e.g. if it's Uzbek, reply in Uzbek; if Russian, reply in Russian; if English, reply in English). Do not switch to random languages.\n\nText: {prompt}"
-                        
-                        response = client.models.generate_content(
-                            model="gemini-2.5-flash", 
-                            contents=full_prompt
-                        )
-                        bot_reply = response.text
-                    except Exception as e:
-                        bot_reply = f"Error / Xatolik: {e}"
-
-                    st.markdown(bot_reply)
-                    current_messages.append({"role": "assistant", "content": bot_reply})
-            
-            st.rerun()
+                st.markdown(bot_reply)
+                current_messages.append({"role": "assistant", "content": bot_reply})
+        
+        st.rerun()
