@@ -33,23 +33,25 @@ st.markdown("""
         box-sizing: border-box;
     }
 
-    /* Ustunlarni bitta qatorga tekislash va oraliq ochish */
+    /* Ustunlarni mukammal vertikal markazga keltirish */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
+        gap: 10px !important;
     }
 
-    /* Ustun kengliklarini to'g'rilash (Tugma uchun kichik, input uchun katta joy) */
+    /* Birinchi ustun kengligi */
     div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        flex: 0 0 45px !important;
-        width: 45px !important;
+        flex: 0 0 50px !important;
+        width: 50px !important;
     }
+    
+    /* Ikkinchi ustun (Chat input) qolgan joyni egallaydi */
     div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
         flex: 1 1 auto !important;
     }
 
-    /* [+] tugmasi uslubi (Aylanali va tashqarida) */
+    /* [+] tugmasi uslubi (To'liq ko'rinadigan va chiroyli) */
     div[data-testid="stPopover"] > button {
         border-radius: 50% !important;
         width: 45px !important;
@@ -76,6 +78,11 @@ st.markdown("""
         border-radius: 16px !important;
         padding: 12px !important;
     }
+
+    /* Chat inputni chiroyli qilish */
+    div[data-testid="stChatInput"] {
+        border-radius: 24px !important;
+    }
     
     textarea { spellcheck: false !important; }
     </style>
@@ -98,8 +105,8 @@ else:
             if message.get("image_base64"):
                 st.image(base64.b64decode(message["image_base64"]), width=250)
 
-    # Pastki qism: Chapda tashqarida [+] va o'ngda Chat Input
-    col1, col2 = st.columns([1, 15])
+    # Pastki qism: [+] tugmasi va Chat Input yonma-yon
+    col1, col2 = st.columns([1, 14])
 
     with col1:
         with st.popover("+"):
