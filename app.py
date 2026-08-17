@@ -149,8 +149,17 @@ else:
             }
         }
 
-        # Birinchi kirganda English tanlanib turishi uchun index=0 (chunki ro'yxatda birinchi turibdi)
-        selected_lang = st.selectbox("🌐 Language / Til", list(languages.keys()), index=0)
+        lang_keys = list(languages.keys())
+
+        # Agar oldin til tanlangan bo'lsa, uning indexini topib qo'shamiz (shunda o'chib ketmaydi)
+        if "selected_lang" not in st.session_state:
+            st.session_state.selected_lang = "🇬🇧 English"
+        
+        current_index = lang_keys.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_keys else 0
+
+        # Til tanlash menyusi
+        selected_lang = st.selectbox("🌐 Language / Til", lang_keys, index=current_index)
+        st.session_state.selected_lang = selected_lang
         t = languages[selected_lang]
 
         st.divider()
