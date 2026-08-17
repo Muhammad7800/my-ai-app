@@ -24,19 +24,6 @@ def init_db():
         )
     ''')
     
-    try:
-        cursor.execute("SELECT device_id FROM messages LIMIT 1")
-    except sqlite3.OperationalError:
-        cursor.execute("DROP TABLE messages")
-        cursor.execute('''
-            CREATE TABLE messages (
-                device_id TEXT,
-                chat_id TEXT,
-                role TEXT,
-                content TEXT
-            )
-        ''')
-        
     conn.commit()
     return conn
 
@@ -127,17 +114,9 @@ st.markdown("""
 
 api_key = st.secrets.get("GROQ_API_KEY")
 if not api_key:
-    st.error("GROQ_API_KEY kiritilmagan! Iltimos Streamlit Secrets ga qo'shing.")
+    st.error("GROQ_API_KEY topilmadi! Iltimos Streamlit Secrets bo'limini tekshiring.")
 else:
     client = Groq(api_key=api_key)
-
-    chats = get_all_chats(db_conn, current_device_id)
-
-    if "current_chat_id" not in st.session_state:
-        if chats:
-            st.session_state.current_chat_id = list(chats.keys())[0]
-        else:
-            st.session_state.current_chat_id = str(uuid.uuid4())
 
     # --- CHAP PANEL ---
     with st.sidebar:
@@ -152,12 +131,12 @@ else:
         chats = get_all_chats(db_conn, current_device_id)
         chat_ids = list(chats.keys())
         
+        if "current_chat_id" not in st.session_state:
+            st.session_state.current_chat_id = chat_ids[0] if chat_ids else str(uuid.uuid4())
+
         for i, cid in enumerate(chat_ids):
             chat_history = chats[cid]
-            if chat_history:
-                chat_title = chat_history[0]["content"][:18] + "..."
-            else:
-                chat_title = f"Chat {i+1} (Empty)"
+            chat_title = chat_history[0]["content"][:18] + "..." if chat_history else f"Chat {i+1}"
             
             c1, c2 = st.columns([0.75, 0.25])
             with c1:
@@ -167,17 +146,12 @@ else:
             with c2:
                 if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
                     delete_chat_from_db(db_conn, current_device_id, cid)
-                    remaining_chats = get_all_chats(db_conn, current_device_id)
-                    if remaining_chats:
-                        st.session_state.current_chat_id = list(remaining_chats.keys())[0]
-                    else:
-                        st.session_state.current_chat_id = str(uuid.uuid4())
+                    st.session_state.current_chat_id = str(uuid.uuid4())
                     st.rerun()
 
     # --- ASOSIY CHAT OYNASI ---
-    chats = get_all_chats(db_conn, current_device_id)
     current_chat_id = st.session_state.current_chat_id
-    current_messages = chats.get(current_chat_id, [])
+    current_messages = get_all_chats(db_conn, current_device_id).get(current_chat_id, [])
 
     if not current_messages:
         st.markdown("""
@@ -201,17 +175,15 @@ else:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    messages_payload = [{"role": m["role"], "content": m["content"]} for m in current_messages]
-                    messages_payload.append({"role": "user", "content": prompt})
-
+                    # Model o'zgartirildi:
                     response = client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=messages_payload,
+                        model="llama-3.1-8b-instant",
+                        messages=[{"role": m["role"], "content": m["content"]} for m in current_messages] + [{"role": "user", "content": prompt}],
                         temperature=0.7
                     )
                     bot_reply = response.choices[0].message.content
                 except Exception as e:
-                    bot_reply = f"Error / Xatolik: {e}"
+                    bot_reply = f"Error: {e}"
 
                 st.markdown(bot_reply)
                 save_message(db_conn, current_device_id, current_chat_id, "assistant", bot_reply)
