@@ -1,6 +1,7 @@
 import streamlit as st
 from google import genai
 import uuid
+import sqlite3
 
 st.set_page_config(
     page_title="Gemini AI", 
@@ -8,6 +9,44 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# --- BAZANI YARATISH VA ULANISH ---
+def init_db():
+    conn = sqlite3.connect('chat_history.db', check_same_thread=False)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            chat_id TEXT,
+            role TEXT,
+            content TEXT
+        )
+    ''')
+    conn.commit()
+    return conn
+
+db_conn = init_db()
+
+def get_all_chats(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT chat_id FROM messages")
+    rows = cursor.fetchall()
+    chats = {}
+    for row in rows:
+        cid = row[0]
+        cursor.execute("SELECT role, content FROM messages WHERE chat_id = ?", (cid,))
+        messages = [{"role": r[0], "content": r[1]} for r in cursor.fetchall()]
+        chats[cid] = messages
+    return chats
+
+def save_message(conn, chat_id, role, content):
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO messages (chat_id, role, content) VALUES (?, ?, ?)", (chat_id, role, content))
+    conn.commit()
+
+def delete_chat_from_db(conn, chat_id):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM messages WHERE chat_id = ?", (chat_id,))
+    conn.commit()
 
 # --- CSS ---
 st.markdown("""
@@ -71,14 +110,15 @@ if not api_key:
 else:
     client = genai.Client(api_key=api_key)
 
-    # Sessiyada chatlar saqlanishini ta'minlash
-    if "chats" not in st.session_state:
-        initial_id = str(uuid.uuid4())
-        st.session_state.chats = {initial_id: []}
-        st.session_state.current_chat_id = initial_id
-    
-    if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.chats:
-        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
+    # Chatlarni bazadan yuklab olish
+    chats = get_all_chats(db_conn)
+
+    if "current_chat_id" not in st.session_state:
+        if chats:
+            st.session_state.current_chat_id = list(chats.keys())[0]
+        else:
+            initial_id = str(uuid.uuid4())
+            st.session_state.current_chat_id = initial_id
 
     # --- CHAP PANEL ---
     with st.sidebar:
@@ -86,15 +126,16 @@ else:
         
         if st.button("➕ New Chat", use_container_width=True):
             new_id = str(uuid.uuid4())
-            st.session_state.chats[new_id] = []
             st.session_state.current_chat_id = new_id
             st.rerun()
         
         st.divider()
 
-        chat_ids = list(st.session_state.chats.keys())
+        chats = get_all_chats(db_conn)
+        chat_ids = list(chats.keys())
+        
         for i, cid in enumerate(chat_ids):
-            chat_history = st.session_state.chats[cid]
+            chat_history = chats[cid]
             if chat_history:
                 chat_title = chat_history[0]["content"][:18] + "..."
             else:
@@ -107,17 +148,18 @@ else:
                     st.rerun()
             with c2:
                 if st.button("🗑️", key=f"del_{cid}", use_container_width=True):
-                    del st.session_state.chats[cid]
-                    if not st.session_state.chats:
-                        new_id = str(uuid.uuid4())
-                        st.session_state.chats = {new_id: []}
-                        st.session_state.current_chat_id = new_id
+                    delete_chat_from_db(db_conn, cid)
+                    remaining_chats = get_all_chats(db_conn)
+                    if remaining_chats:
+                        st.session_state.current_chat_id = list(remaining_chats.keys())[0]
                     else:
-                        st.session_state.current_chat_id = list(st.session_state.chats.keys())[0]
+                        st.session_state.current_chat_id = str(uuid.uuid4())
                     st.rerun()
 
     # --- ASOSIY CHAT OYNASI ---
-    current_messages = st.session_state.chats[st.session_state.current_chat_id]
+    chats = get_all_chats(db_conn)
+    current_chat_id = st.session_state.current_chat_id
+    current_messages = chats.get(current_chat_id, [])
 
     if not current_messages:
         st.markdown("""
@@ -134,7 +176,7 @@ else:
     prompt = st.chat_input("Ask a question...")
 
     if prompt:
-        current_messages.append({"role": "user", "content": prompt})
+        save_message(db_conn, current_chat_id, "user", prompt)
         with st.chat_message("user"):
             st.markdown(prompt)
 
@@ -152,6 +194,6 @@ else:
                     bot_reply = f"Error / Xatolik: {e}"
 
                 st.markdown(bot_reply)
-                current_messages.append({"role": "assistant", "content": bot_reply})
+                save_message(db_conn, current_chat_id, "assistant", bot_reply)
         
         st.rerun()
