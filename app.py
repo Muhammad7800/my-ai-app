@@ -69,14 +69,17 @@ st.markdown("""
         border-color: #555555 !important;
     }
 
-    /* Popover menyuni TEPAGA qarab ochish */
+    /* Popover menyuni TEPAGA qarab majburiy ochish */
     div[data-testid="stPopoverBody"] {
         background-color: #212121 !important;
         border: 1px solid #333333 !important;
         border-radius: 16px !important;
         padding: 12px !important;
-        bottom: 55px !important;
+        position: fixed !important;
+        bottom: 75px !important;
+        left: auto !important;
         top: auto !important;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.5) !important;
     }
     
     textarea { spellcheck: false !important; }
