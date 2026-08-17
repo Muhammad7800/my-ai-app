@@ -79,7 +79,7 @@ st.markdown("""
         margin: 0 auto;
     }
 
-    /* Chat input katagini ixcham qilish */
+    /* Chat input katagini ixcham qilish va qizil chiziqni o'chirish */
     div[data-testid="stChatInput"] {
         border-radius: 20px !important;
         min-height: 38px !important;
@@ -87,6 +87,11 @@ st.markdown("""
     
     div[data-testid="stChatInput"] textarea {
         font-size: 14px !important;
+    }
+
+    /* Brauzerning imlo xatosi ostidagi qizil chizig'ini yashirish */
+    textarea {
+        spellcheck: false !important;
     }
 
     /* Boshlang'ich sahifa sarlavhasi dizayni */
