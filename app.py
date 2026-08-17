@@ -1,16 +1,16 @@
 import streamlit as st
-from google import genai
+from groq import Groq
 import uuid
 import sqlite3
 
 st.set_page_config(
-    page_title="Gemini AI", 
+    page_title="AI Chat", 
     page_icon="⚡", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- BAZANI YARATISH VA TEKKSHIRISH ---
+# --- BAZANI YARATISH VA TEKSHIRISH ---
 def init_db():
     conn = sqlite3.connect('chat_history.db', check_same_thread=False)
     cursor = conn.cursor()
@@ -125,11 +125,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-api_key = st.secrets.get("GEMINI_API_KEY")
+api_key = st.secrets.get("GROQ_API_KEY")
 if not api_key:
-    st.error("API Kalit kiritilmagan!")
+    st.error("GROQ_API_KEY kiritilmagan! Iltimos Streamlit Secrets ga qo'shing.")
 else:
-    client = genai.Client(api_key=api_key)
+    client = Groq(api_key=api_key)
 
     chats = get_all_chats(db_conn, current_device_id)
 
@@ -137,16 +137,14 @@ else:
         if chats:
             st.session_state.current_chat_id = list(chats.keys())[0]
         else:
-            initial_id = str(uuid.uuid4())
-            st.session_state.current_chat_id = initial_id
+            st.session_state.current_chat_id = str(uuid.uuid4())
 
     # --- CHAP PANEL ---
     with st.sidebar:
         st.markdown("### 💬 Chat History")
         
         if st.button("➕ New Chat", use_container_width=True):
-            new_id = str(uuid.uuid4())
-            st.session_state.current_chat_id = new_id
+            st.session_state.current_chat_id = str(uuid.uuid4())
             st.rerun()
         
         st.divider()
@@ -203,13 +201,15 @@ else:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language. Do not switch to other languages.\n\nText: {prompt}"
-                    
-                    response = client.models.generate_content(
-                        model="gemini-2.5-flash", 
-                        contents=full_prompt
+                    messages_payload = [{"role": m["role"], "content": m["content"]} for m in current_messages]
+                    messages_payload.append({"role": "user", "content": prompt})
+
+                    response = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=messages_payload,
+                        temperature=0.7
                     )
-                    bot_reply = response.text
+                    bot_reply = response.choices[0].message.content
                 except Exception as e:
                     bot_reply = f"Error / Xatolik: {e}"
 
