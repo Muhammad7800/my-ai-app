@@ -60,7 +60,7 @@ else:
         st.session_state.current_chat_id = initial_id
         st.session_state.chats[initial_id] = []
 
-    # --- YON PANEL (SIDEBAR) VA TILLAR ---
+    # --- YON PANEL (SIDEBAR) VA TILLAR (Faqat 3 ta til) ---
     with st.sidebar:
         languages = {
             "🇬🇧 English": {
@@ -83,69 +83,6 @@ else:
                 "placeholder": "Введите ваш вопрос...",
                 "thinking": "Думает...",
                 "empty": "Пусто"
-            },
-            "🇹🇷 Türkçe": {
-                "title": "💬 Sohbet Geçmişi",
-                "new_chat": "➕ Yeni Sohbet",
-                "placeholder": "Bir soru sorun...",
-                "thinking": "Düşünüyor...",
-                "empty": "Boş"
-            },
-            "🇮🇹 Italiano": {
-                "title": "💬 Cronologia chat",
-                "new_chat": "➕ Nuova chat",
-                "placeholder": "Fai una domanda...",
-                "thinking": "Sto pensando...",
-                "empty": "Vuoto"
-            },
-            "🇪🇸 Español": {
-                "title": "💬 Historial de chats",
-                "new_chat": "➕ Nuevo chat",
-                "placeholder": "Haz una pregunta...",
-                "thinking": "Pensando...",
-                "empty": "Vacío"
-            },
-            "🇫🇷 Français": {
-                "title": "💬 Historique des chats",
-                "new_chat": "➕ Nouveau chat",
-                "placeholder": "Posez une question...",
-                "thinking": "Réflexion...",
-                "empty": "Vide"
-            },
-            "🇩🇪 Deutsch": {
-                "title": "💬 Chat-Verlauf",
-                "new_chat": "➕ Neuer Chat",
-                "placeholder": "Stellen Sie eine Frage...",
-                "thinking": "Denkt nach...",
-                "empty": "Leer"
-            },
-            "🇸🇦 العربية": {
-                "title": "💬 سجل المحادثات",
-                "new_chat": "➕ دردشة جديدة",
-                "placeholder": "اطرح سؤالاً...",
-                "thinking": "جاري التفكير...",
-                "empty": "فارغ"
-            },
-            "🇨🇳 中文": {
-                "title": "💬 聊天记录",
-                "new_chat": "➕ 新建聊天",
-                "placeholder": "请输入您的问题...",
-                "thinking": "思考中...",
-                "empty": "空"
-            },
-            "🇰🇷 한국어": {
-                "title": "💬 대화 기록",
-                "new_chat": "➕ 새 대화",
-                "placeholder": "질문을 입력하세요...",
-                "thinking": "생각 중...",
-                "empty": "비어 있음"
-            },
-            "🇯🇵 日本語": {
-                "title": "💬 チャット履歴",
-                "new_chat": "➕ 新しいチャット",
-                "placeholder": "質問を入力してください...",
-                "thinking": "考え中...",
-                "empty": "空"
             }
         }
 
