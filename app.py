@@ -1,8 +1,21 @@
 import streamlit as st
 from google import genai
+from PIL import Image
 
-st.set_page_config(page_title="AI Chat", page_icon="🤖")
-st.title("🤖 Mening AI Yordamchim")
+# Sahifa sozlamalari
+st.set_page_config(page_title="Gemini Core", page_icon="⚡", layout="centered")
+
+# Yon menyu (Sidebar) - Custom sozlamalar
+with st.sidebar:
+    st.title("⚡ Gemini Core")
+    st.caption("Shaxsiy Sun'iy Intellekt Yordamchisi")
+    st.divider()
+    if st.button("🗑️ Suhbatni tozalash", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+
+st.title("⚡ Gemini Core")
+st.write("Savollaringizga javob beraman va rasmlarni tahlil qila olaman.")
 
 api_key = st.secrets.get("GEMINI_API_KEY")
 
@@ -11,37 +24,50 @@ if not api_key:
 else:
     client = genai.Client(api_key=api_key)
 
-    # Chat xotirasini yaratish (sahifa yangilanganda o'chib ketmaydi)
+    # Chat xotirasi
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Eski xabarlarni ekranga chiqarish
+    # Tarixdagi xabarlarni ko'rsatish
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Foydalanuvchi xabar kiritadigan joy
+    # Rasm yuklash maydoni (ixtiyoriy)
+    uploaded_file = st.file_uploader("Rasm biriktirish (ixtiyoriy)", type=["jpg", "jpeg", "png"])
+    img = Image.open(uploaded_file) if uploaded_file else None
+
+    if img:
+        st.image(img, caption="Biriktirilgan rasm", use_container_width=True)
+
+    # Matn kiritish maydoni
     if prompt := st.chat_input("Savolingizni yozing..."):
-        # Foydalanuvchi xabarini ekranga chiqarish va xotiraga saqlash
+        # Foydalanuvchi xabarini ko'rsatish
         st.chat_message("user").markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # Gemini modelidan javob olish
+        # AI javobi
         with st.chat_message("assistant"):
-            system_instruction = "Siz do'stona va aqlli AI yordamchisiz. Foydalanuvchi qaysi tilda murojaat qilsa, o'sha tilda ravon va aniq javob bering."
-            
-            # Barcha chat tarixini Gemini'ga yuborish uchun tayyorlash
-            contents = []
-            for msg in st.session_state.messages:
-                contents.append(f"{msg['role']}: {msg['content']}")
+            with st.spinner("O'ylanmoqda..."):
+                system_instruction = (
+                    "Siz aqlli, samimiy va do'stona AI yordamchisiz. "
+                    "Foydalanuvchiga aniq, tushunarli va ravon dilda javob bering."
+                )
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents="\n".join(contents),
-                config={"system_instruction": system_instruction}
-            )
+                # So'rovni tayyorlash
+                if img:
+                    contents = [prompt, img]
+                else:
+                    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages])
+                    contents = history_text
 
-            st.markdown(response.text)
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=contents,
+                    config={"system_instruction": system_instruction}
+                )
+
+                st.markdown(response.text)
 
         # AI javobini xotiraga saqlash
         st.session_state.messages.append({"role": "assistant", "content": response.text})
