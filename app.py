@@ -2,7 +2,7 @@ import streamlit as st
 from google import genai
 import uuid
 
-# Sahifa sozlamalari (sidebar doim ochiq turishi uchun initial_sidebar_state qo'shildi)
+# Sahifa sozlamalari
 st.set_page_config(
     page_title="Gemini AI", 
     page_icon="⚡", 
@@ -83,55 +83,12 @@ else:
         st.session_state.current_chat_id = initial_id
         st.session_state.chats[initial_id] = []
 
-    if "selected_lang" not in st.session_state:
-        st.session_state.selected_lang = "🇬🇧 English"
-
-    languages = {
-        "🇬🇧 English": {
-            "title": "💬 Chat History",
-            "new_chat": "➕ New Chat",
-            "placeholder": "Ask a question...",
-            "thinking": "Thinking...",
-            "empty": "Empty",
-            "welcome": "Hello!",
-            "subtitle": "How can I help you today?"
-        },
-        "🇺🇿 O'zbekcha": {
-            "title": "💬 Chatlar tarixi",
-            "new_chat": "➕ Yangi chat",
-            "placeholder": "Savolingizni yozing...",
-            "thinking": "O'ylamoqda...",
-            "empty": "Bo'sh",
-            "welcome": "Salom!",
-            "subtitle": "Bugun sizga qanday yordam bera olaman?"
-        },
-        "🇷🇺 Русский": {
-            "title": "💬 История чатов",
-            "new_chat": "➕ Новый чат",
-            "placeholder": "Введите ваш вопрос...",
-            "thinking": "Думает...",
-            "empty": "Пусто",
-            "welcome": "Привет!",
-            "subtitle": "Чем я могу помочь вам сегодня?"
-        }
-    }
-
-    lang_keys = list(languages.keys())
-    t = languages[st.session_state.selected_lang]
-
-    # --- CHAP CHETDAGI PANEL (SIDEBAR) ---
+    # --- CHAP CHETDAGI PANEL (Faqat chat tarixi va yangi chat uchun) ---
     with st.sidebar:
-        current_index = lang_keys.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_keys else 0
-        selected_lang = st.selectbox("🌐 Language / Til", lang_keys, index=current_index)
-        if selected_lang != st.session_state.selected_lang:
-            st.session_state.selected_lang = selected_lang
-            st.rerun()
-
-        st.divider()
-        st.markdown(f"### {t['title']}")
+        st.markdown("### 💬 Chat History")
         
         # Yangi chat ochish tugmasi
-        if st.button(t["new_chat"], use_container_width=True):
+        if st.button("➕ New Chat", use_container_width=True):
             new_id = str(uuid.uuid4())
             st.session_state.chats[new_id] = []
             st.session_state.current_chat_id = new_id
@@ -146,7 +103,7 @@ else:
             if chat_history:
                 chat_title = chat_history[0]["content"][:18] + "..."
             else:
-                chat_title = f"Chat {i+1} ({t['empty']})"
+                chat_title = f"Chat {i+1} (Empty)"
             
             c1, c2 = st.columns([0.75, 0.25])
             with c1:
@@ -172,10 +129,10 @@ else:
 
     # Welcome ekrani yoki chat tarixi
     if not current_messages:
-        st.markdown(f"""
+        st.markdown("""
             <div class="welcome-container">
-                <div class="welcome-title">{t["welcome"]}</div>
-                <div class="welcome-subtitle">{t["subtitle"]}</div>
+                <div class="welcome-title">Hello!</div>
+                <div class="welcome-subtitle">How can I help you today?</div>
             </div>
         """, unsafe_allow_html=True)
     else:
@@ -184,7 +141,7 @@ else:
                 st.markdown(message["content"])
 
     # Chat input
-    prompt = st.chat_input(t["placeholder"])
+    prompt = st.chat_input("Ask a question...")
 
     if prompt:
         current_messages.append({"role": "user", "content": prompt})
@@ -192,9 +149,10 @@ else:
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner(t["thinking"]):
+            with st.spinner("Thinking..."):
                 try:
-                    full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language (e.g. if it's Uzbek, reply in Uzbek; if Russian, reply in Russian; if English, reply in English). Do not switch to random languages.\n\nText: {prompt}"
+                    # Foydalanuvchi qaysi tilda yozgan bo'lsa, xuddi o'sha tilda javob berishini talab qilamiz
+                    full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language. Do not switch to other languages.\n\nText: {prompt}"
                     
                     response = client.models.generate_content(
                         model="gemini-2.5-flash", 
