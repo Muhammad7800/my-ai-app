@@ -24,7 +24,6 @@ def init_db():
         )
     ''')
     
-    # Eski jadvalda device_id ustuni yo'q bo'lsa, xatolik chiqmasligi uchun tekshiramiz va yangilaymiz
     try:
         cursor.execute("SELECT device_id FROM messages LIMIT 1")
     except sqlite3.OperationalError:
@@ -207,7 +206,7 @@ else:
                     full_prompt = f"Detect the language of this text: '{prompt}'. Reply to it naturally and strictly in that exact same language. Do not switch to other languages.\n\nText: {prompt}"
                     
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash", 
+                        model="gemini-1.5-flash", 
                         contents=full_prompt
                     )
                     bot_reply = response.text
