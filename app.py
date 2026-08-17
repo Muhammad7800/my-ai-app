@@ -176,7 +176,7 @@ else:
             with st.spinner("Thinking..."):
                 try:
                     response = client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
+                        model="openai/gpt-oss-20b",
                         messages=[{"role": m["role"], "content": m["content"]} for m in current_messages] + [{"role": "user", "content": prompt}],
                         temperature=0.7
                     )
